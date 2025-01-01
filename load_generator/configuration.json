@@ -1,0 +1,12 @@
+{
+    "ingestion_rate": [100, 500, 1000],
+    "duration": 600,
+    "metric_types": ["temperature", "humidity"],
+    "query_interval": 10,
+    "query_list": [
+      "avg_over_time(temperature[5m])",
+      "rate(humidity[1m])"
+    ],
+    "load_generator_instances": 3,
+    "data_source": "synthetic"
+}
