@@ -4,9 +4,23 @@ import time
 import threading
 from http.server import HTTPServer, BaseHTTPRequestHandler
 import os
+import logging
+import time
 
-START_PORT = os.environ.get("STARTING_PORT", 8000)
-NUM_TARGETS = os.environ.get("NUM_TARGETS", 5)
+LOG_FILE = os.environ.get("LOG_FILE", "load_generator.log")
+logging.basicConfig(
+    filename=LOG_FILE,
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s",
+)
+
+# env vars
+START_PORT = int(os.environ.get("START_PORT", 8000))
+NUM_TARGETS = int(os.environ.get("NUM_TARGETS", 5))
+SEED = int(os.environ.get("SEED", 42))
+
+random.seed(SEED)
+
 class MetricHandler(BaseHTTPRequestHandler):
     def __init__(self, registry, *args, **kwargs):
         self.registry = registry
@@ -22,7 +36,6 @@ class MetricHandler(BaseHTTPRequestHandler):
             self.send_response(404)
             self.end_headers()
 
-
 class ScrapeTarget:
     def __init__(self, port, metric_name):
         self.registry = CollectorRegistry()
@@ -31,21 +44,24 @@ class ScrapeTarget:
 
     def start(self):
         def run_server():
-            server = HTTPServer(('localhost', self.port), lambda *args, **kwargs: MetricHandler(self.registry, *args, **kwargs))
+            server = HTTPServer(('0.0.0.0', self.port), lambda *args, **kwargs: MetricHandler(self.registry, *args, **kwargs))
             server.serve_forever()
 
         threading.Thread(target=run_server, daemon=True).start()
 
         while True:
-            self.metric.set(random.uniform(0, 100))
+            value = random.uniform(0, 100)
+            self.metric.set(value)
+            logging.info(f"{int(time.time() * 1000)} - Metric updated: port={self.port}, metric={self.metric._name}, value={value:.2f}")
             time.sleep(1)
-
 
 class LoadGenerator:
     def __init__(self):
         self.start_port = START_PORT
         self.num_targets = NUM_TARGETS
         self.targets = []
+        logging.info(f"{int(time.time() * 1000)} - Load generator started with {self.num_targets} targets, starting at port {self.start_port}.")
+
 
     def run(self):
         for i in range(self.num_targets):
@@ -55,10 +71,8 @@ class LoadGenerator:
             self.targets.append(target)
             threading.Thread(target=target.start, daemon=True).start()
 
-
 if __name__ == "__main__":
     generator = LoadGenerator()
     generator.run()
-    print("Load generators running with isolated metrics per target...")
     while True:
         time.sleep(10)
