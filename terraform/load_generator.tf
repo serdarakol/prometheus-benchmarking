@@ -15,11 +15,8 @@ resource "google_compute_instance" "load_generator" {
     access_config {}
   }
 
-  metadata_startup_script = <<-EOT
-    #!/bin/bash
-    sudo apt-get update
-    sudo apt-get install -y python3-pip
-    pip3 install prometheus_client
-    python3 /path/to/load_generator.py
-  EOT
+  metadata_startup_script = templatefile("${path.module}/load_generator_startup.sh.tpl", {
+    start_port   = 8000 + count.index * 5
+    num_targets  = 5
+  })
 }

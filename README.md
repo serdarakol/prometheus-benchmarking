@@ -1,2 +1,39 @@
 # prometheus-benchmarking
 cloud service benchmarking - benchmarking prometheus query latency under scale-out
+
+pip3 install prometheus_client and stuff
+
+
+```brew install prometheus``` or corresponding commands for installing prometheus
+
+prometheus --config.file=<config yml file>
+
+
+benchmarking-prometheus-latency/
+├── configs/                # Configurations for Prometheus and experiments
+│   ├── prometheus.yml.tpl  # Template for Prometheus configuration
+│   └── experiments.json    # Experiment configurations (e.g., number of targets, query interval)
+├── terraform/              # Terraform deployment files
+│   ├── main.tf             # Main Terraform script
+│   ├── variables.tf        # Terraform variables
+│   ├── outputs.tf          # Terraform outputs
+│   ├── load_generator.tf   # Terraform script for load generators
+│   ├── prometheus.tf       # Terraform script for Prometheus deployment
+│   └── query_component.tf  # Terraform script for query components
+├── scripts/                # Python scripts for load generation, querying, and orchestration
+│   ├── load_generator.py   # Load generator script
+│   ├── query_component.py  # Querying component script
+│   ├── prometheus_config_generator.py # Generates Prometheus configuration
+│   └── orchestrator.py     # Orchestrates the experiments
+├── docker/                 # Dockerfiles for components (optional)
+│   ├── Dockerfile.load     # Dockerfile for load generator
+│   ├── Dockerfile.query    # Dockerfile for query component
+│   └── Dockerfile.prometheus  # Dockerfile for Prometheus
+├── logs/                   # Logs from experiments
+│   ├── raw/                # Raw logs from components
+│   ├── refined/            # Processed logs for analysis
+│   └── analysis/           # Analysis results
+├── results/                # Experiment results
+│   └── experiment_01/      # Separate folder for each experiment
+├── .env                    # Environment variables file
+└── README.md               # Documentation for the repository

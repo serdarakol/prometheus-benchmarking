@@ -1,0 +1,49 @@
+{
+    "experiments": [
+        {
+            "prometheus_instances": 1,
+            "load_generators": 5,
+            "query_components": 2
+        },
+        {
+            "prometheus_instances": 1,
+            "load_generators": 5,
+            "query_components": 4
+        },
+        {
+            "prometheus_instances": 1,
+            "load_generators": 5,
+            "query_components": 6
+        },
+        {
+            "prometheus_instances": 1,
+            "load_generators": 10,
+            "query_components": 2
+        },
+        {
+            "prometheus_instances": 1,
+            "load_generators": 10,
+            "query_components": 4
+        },
+        {
+            "prometheus_instances": 1,
+            "load_generators": 10,
+            "query_components": 6
+        },
+        {
+            "prometheus_instances": 2,
+            "load_generators": 20,
+            "query_components": 2
+        },
+        {
+            "prometheus_instances": 2,
+            "load_generators": 20,
+            "query_components": 4
+        },
+        {
+            "prometheus_instances": 2,
+            "load_generators": 20,
+            "query_components": 6
+        }
+    ]
+}

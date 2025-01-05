@@ -16,6 +16,6 @@ def generate_prometheus_config(targets, scrape_interval="5s"):
 if __name__ == "__main__":
     targets = [f"localhost:{8000 + i}" for i in range(5)]
     config = generate_prometheus_config(targets)
-    with open("prometheus.yml", 'w') as f:
+    with open("prometheus_component/prometheus.yml", 'w') as f:
         yaml.dump(config, f, default_flow_style=False)
     print("Prometheus configuration generated.")

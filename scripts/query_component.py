@@ -1,15 +1,20 @@
 import requests
 import time
 import json
+import os
 
-PROMETHEUS_URL = f'http://<PROMETHEUS_IP>:9090/api/v1/query'
+PROMETHEUS_URL = os.environ.get("PROMETHEUS_URL", "http://localhost:9090/api/v1/query")
+QUERY_LIST = os.environ.get("QUERY_LIST", '["rate(metric_0[1m])"]')
+LOG_FILE = os.environ.get("LOG_FILE", "query_logs.json")
+QUERY_INTERVAL = os.environ.get("INTERVAL", 10)
+EXPERIMENT_DURATION = os.environ.get("DURATION", 60)
 
 class QueryComponent:
-    def __init__(self, queries, interval, duration, log_file):
-        self.queries = queries
-        self.interval = interval
-        self.duration = duration
-        self.log_file = log_file
+    def __init__(self):
+        self.queries = QUERY_LIST
+        self.interval = QUERY_INTERVAL
+        self.duration = EXPERIMENT_DURATION
+        self.log_file = LOG_FILE
 
     def execute_query(self, query):
         response = requests.get(PROMETHEUS_URL, params={"query": query})
@@ -19,7 +24,9 @@ class QueryComponent:
             "status_code": response.status_code
         }
         if response.status_code == 200:
-            result["latency"] = response.elapsed.total_seconds()
+            result["latency_ms"] = response.elapsed.total_seconds() * 1000
+            result["data"] = response.json()
+            result["elapsed"] = response.elapsed
         return result
 
     def run(self):
@@ -33,7 +40,6 @@ class QueryComponent:
             json.dump(logs, f, indent=4)
 
 if __name__ == "__main__":
-    queries = ["rate(metric_0[1m])", "avg_over_time(metric_1[5m])"]
-    component = QueryComponent(queries, interval=10, duration=300, log_file="query_logs.json")
+    component = QueryComponent()
     component.run()
     print("Query execution completed.")
