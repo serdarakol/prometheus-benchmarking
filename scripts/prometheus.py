@@ -34,18 +34,14 @@ def upload_config(ip, config):
     config_path = "/etc/prometheus/prometheus.yml"
     temp_file = f"./prometheus_{ip.replace('.', '_')}.yml"
 
-    # Save the config to a temporary file
     with open(temp_file, "w") as f:
         yaml.dump(config, f)
 
-    # Upload the config file to the Prometheus instance
     subprocess.run(["scp", temp_file, f"user@{ip}:{config_path}"])
 
-    # Restart Prometheus on the remote instance
     restart_script = f"""
     sudo systemctl restart prometheus
     """
     subprocess.run(["ssh", f"user@{ip}", restart_script])
 
-    # Clean up temporary file
-    os.remove(temp_file)
+    # os.remove(temp_file)

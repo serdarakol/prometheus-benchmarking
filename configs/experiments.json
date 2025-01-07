@@ -3,11 +3,13 @@
         {
             "load_generators": {
                 "count": 1,
-                "env": {
-                    "SEED": 42,
-                    "START:PORT": 8000,
-                    "NUM_TARGETS": 5
-                }
+                "envs": [
+                    {
+                        "SEED": 42,
+                        "START:PORT": 8000,
+                        "NUM_TARGETS": 5
+                    }
+                ]
             },
             "prometheus_instances": {
                 "count": 1,
@@ -17,13 +19,15 @@
             },
             "query_components": {
                 "count": 1,
-                "env": {
-                    "SEED": 42,
-                    "QUERY_LIST": ["rate(metric_0[1m])"],
-                    "LOG_FILE": "query_logs.json",
-                    "QUERY_INTERVAL": 1,
-                    "EXPERIMENT_DURATION": 60
-                }
+                "envs": [
+                    {
+                        "SEED": 42,
+                        "QUERY_LIST": ["rate(metric_0[1m])"],
+                        "LOG_FILE": "query_logs.json",
+                        "QUERY_INTERVAL": 1,
+                        "EXPERIMENT_DURATION": 60
+                    }
+                ]
             }
         }
     ]
