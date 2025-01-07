@@ -6,8 +6,7 @@
                 "env": {
                     "SEED": 42,
                     "START:PORT": 8000,
-                    "NUM_TARGETS": 5,
-                    "LOG_FILE": "load_generator.log"
+                    "NUM_TARGETS": 5
                 }
             },
             "prometheus_instances": {
