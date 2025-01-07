@@ -9,7 +9,7 @@ import random
 PROMETHEUS_URL = os.environ.get("PROMETHEUS_URL", "http://localhost:9090/api/v1/query")
 QUERY_LIST = json.loads(os.environ.get("QUERY_LIST", '["rate(metric_0[1m])"]'))
 LOG_FILE = os.environ.get("LOG_FILE", "query_logs.json")
-QUERY_INTERVAL = int(os.environ.get("QUERY_INTERVAL", 10))
+QUERY_INTERVAL = int(os.environ.get("QUERY_INTERVAL", 1))
 EXPERIMENT_DURATION = int(os.environ.get("EXPERIMENT_DURATION", 60))
 SEED = int(os.environ.get("SEED", 42))
 

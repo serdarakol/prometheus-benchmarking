@@ -4,70 +4,28 @@
             "load_generators": {
                 "count": 1,
                 "env": {
+                    "SEED": 42,
                     "START:PORT": 8000,
                     "NUM_TARGETS": 5,
-                    "SEED": 42,
                     "LOG_FILE": "load_generator.log"
                 }
             },
             "prometheus_instances": {
                 "count": 1,
                 "env": {
-                    "START:PORT": 8000,
-                    "NUM_TARGETS": 5,
-                    "SEED": 42,
-                    "LOG_FILE": "load_generator.log"
+                    "SCRAPE_INTERVAL": "1s"
                 }
             },
             "query_components": {
                 "count": 1,
                 "env": {
-                    "START:PORT": 8000,
-                    "NUM_TARGETS": 5,
                     "SEED": 42,
-                    "LOG_FILE": "load_generator.log"
+                    "QUERY_LIST": ["rate(metric_0[1m])"],
+                    "LOG_FILE": "query_logs.json",
+                    "QUERY_INTERVAL": 1,
+                    "EXPERIMENT_DURATION": 60
                 }
             }
-        },
-        {
-            "prometheus_instances": 1,
-            "load_generators": 5,
-            "query_components": 4
-        },
-        {
-            "prometheus_instances": 1,
-            "load_generators": 5,
-            "query_components": 6
-        },
-        {
-            "prometheus_instances": 1,
-            "load_generators": 10,
-            "query_components": 2
-        },
-        {
-            "prometheus_instances": 1,
-            "load_generators": 10,
-            "query_components": 4
-        },
-        {
-            "prometheus_instances": 1,
-            "load_generators": 10,
-            "query_components": 6
-        },
-        {
-            "prometheus_instances": 2,
-            "load_generators": 20,
-            "query_components": 2
-        },
-        {
-            "prometheus_instances": 2,
-            "load_generators": 20,
-            "query_components": 4
-        },
-        {
-            "prometheus_instances": 2,
-            "load_generators": 20,
-            "query_components": 6
         }
     ]
 }
