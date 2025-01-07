@@ -11,12 +11,18 @@ resource "google_compute_instance" "load_generator" {
   }
 
   network_interface {
-    network = "default"
-    access_config {}
+    network = google_compute_network.vpc_network.id
+    access_config {
+      # Include this section to give the VM an external IP address
+    }
   }
 
-  metadata_startup_script = templatefile("${path.module}/load_generator_startup.sh.tpl", {
-    start_port   = 8000 + count.index * 5
-    num_targets  = 5
-  })
+  metadata_startup_script = <<EOT
+    #!/bin/bash
+    export DEBIAN_FRONTEND=noninteractive
+    sudo apt-get update
+    sudo apt-get install -y python3-pip
+    pip3 install prometheus_client
+    echo "Load generator ready."
+  EOT
 }

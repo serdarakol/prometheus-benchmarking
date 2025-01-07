@@ -11,15 +11,18 @@ resource "google_compute_instance" "query_component" {
   }
 
   network_interface {
-    network = "default"
-    access_config {}
+    network = google_compute_network.vpc_network.id
+    access_config {
+      # Include this section to give the VM an external IP address
+    }
   }
 
-  metadata_startup_script = <<-EOT
+  metadata_startup_script = <<EOT
     #!/bin/bash
+    export DEBIAN_FRONTEND=noninteractive
     sudo apt-get update
     sudo apt-get install -y python3-pip
     pip3 install requests
-    python3 /path/to/query_component.py
+    echo "Query component ready."
   EOT
 }
