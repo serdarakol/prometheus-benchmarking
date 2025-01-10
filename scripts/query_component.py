@@ -3,17 +3,23 @@ import time
 import json
 import os
 import random
+from google.cloud import storage
 
 
 # Environment variables
 PROMETHEUS_URL = os.environ.get("PROMETHEUS_URL", "http://localhost:9090/api/v1/query")
 QUERY_LIST = json.loads(os.environ.get("QUERY_LIST", '["rate(metric_0[1m])"]'))
+EXPERIMENT_ID = os.environ.get("EXPERIMENT_ID", "default")
 LOG_FILE = os.environ.get("LOG_FILE", "query_logs.json")
 QUERY_INTERVAL = int(os.environ.get("QUERY_INTERVAL", 1))
 EXPERIMENT_DURATION = int(os.environ.get("EXPERIMENT_DURATION", 60))
 SEED = int(os.environ.get("SEED", 42))
 
 random.seed(SEED)
+
+
+GCS_BUCKET_NAME='prometheus-benchmarking-app-logs'
+GCS_FILE_NAME=f'{EXPERIMENT_ID}/query_logs/{LOG_FILE}'
 
 class QueryComponent:
     def __init__(self):
@@ -51,6 +57,17 @@ class QueryComponent:
             }
         return result
 
+
+    def upload_to_gcs(self):
+        """Uploads the log file to Google Cloud Storage."""
+        storage_client = storage.Client()
+        bucket = storage_client.bucket(GCS_BUCKET_NAME)
+        blob = bucket.blob(GCS_FILE_NAME)
+
+        # Upload the file
+        blob.upload_from_filename(self.log_file)
+        print(f"File {self.log_file} uploaded to {GCS_BUCKET_NAME}/{GCS_FILE_NAME}.")
+
     def run(self):
         start_time = time.time()
         logs = []
@@ -63,6 +80,8 @@ class QueryComponent:
         # Write logs to file
         with open(self.log_file, 'w') as f:
             json.dump(logs, f, indent=4)
+
+        self.upload_to_gcs()
 
 if __name__ == "__main__":
     component = QueryComponent()
