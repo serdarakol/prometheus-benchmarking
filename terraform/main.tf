@@ -23,17 +23,91 @@ resource "google_compute_firewall" "allow_all" {
   source_ranges = ["0.0.0.0/0"]
 }
 
-### SUT INSTANCE
-module "prometheus" {
-  source = "./prometheus.tf"
+resource "google_compute_instance" "load_generator" {
+  count         = var.load_generator_count
+  name          = "load-generator-${count.index}"
+  machine_type  = "e2-standard-2"
+  zone          = var.zone
+
+  boot_disk {
+    initialize_params {
+      image = "debian-cloud/debian-11"
+    }
+  }
+
+  network_interface {
+    network = google_compute_network.vpc_network.id
+    access_config {
+      # Include this section to give the VM an external IP address
+    }
+  }
+
+  metadata_startup_script = <<EOT
+    #!/bin/bash
+    export DEBIAN_FRONTEND=noninteractive
+    sudo apt-get update
+    sudo apt-get install -y python3-pip
+    pip3 install prometheus_client
+    echo "Load generator ready."
+  EOT
 }
 
-### BENCHMARK CLIENT load generator component
-module "load_generators" {
-  source = "./load_generator.tf"
+resource "google_compute_instance" "prometheus" {
+  count         = var.prometheus_count
+  name          = "prometheus-${count.index}"
+  machine_type  = "e2-standard-4"
+  zone          = var.zone
+
+  boot_disk {
+    initialize_params {
+      image = "debian-cloud/debian-11"
+    }
+  }
+
+  network_interface {
+    network = google_compute_network.vpc_network.id
+    access_config {
+      # Include this section to give the VM an external IP address
+    }
+  }
+
+  metadata_startup_script = <<EOT
+    #!/bin/bash
+    export DEBIAN_FRONTEND=noninteractive
+    sudo apt-get update
+    sudo apt-get install -y prometheus
+    echo "Prometheus instance ${count.index} ready."
+  EOT
 }
 
-### BENCHMARK CLIENT query component
-module "query_components" {
-  source = "./query_component.tf"
+
+
+resource "google_compute_instance" "query_component" {
+  count         = var.query_component_count
+  name          = "query-component-${count.index}"
+  machine_type  = "e2-standard-2"
+  zone          = var.zone
+
+  boot_disk {
+    initialize_params {
+      image = "debian-cloud/debian-11"
+    }
+  }
+
+  network_interface {
+    network = google_compute_network.vpc_network.id
+    access_config {
+      # Include this section to give the VM an external IP address
+    }
+  }
+
+  metadata_startup_script = <<EOT
+    #!/bin/bash
+    export DEBIAN_FRONTEND=noninteractive
+    sudo apt-get update
+    sudo apt-get install -y python3-pip
+    pip3 install requests
+    echo "Query component ready."
+  EOT
 }
+
