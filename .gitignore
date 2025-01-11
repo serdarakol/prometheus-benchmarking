@@ -8,6 +8,8 @@ __pycache__/
 
 data/
 
+tmp/
+
 terraform/.terraform/
 terraform/.terraform*
 terraform/terraform.tfstate*
