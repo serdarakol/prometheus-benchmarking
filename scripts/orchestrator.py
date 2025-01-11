@@ -47,8 +47,8 @@ def initialize_query_components(query_component_VMs, prometheus_url, envs, exper
     for i, vm_name in enumerate(query_component_VMs):
         env_vars = envs[i]
         command = (
-            f"git clone https://github.com/serdarakol/prometheus-benchmarking.git &&"
-            f"cd prometheus-benchmarking && "
+            f"git clone https://github.com/serdarakol/query_component.git &&"
+            f"cd query_component && "
             f"export PROMETHEUS_URL={prometheus_url} && "
             f"export QUERY_LIST={env_vars['QUERY_LIST']} && "
             f"export EXPERIMENT_ID={experiment_id} && "
@@ -56,7 +56,8 @@ def initialize_query_components(query_component_VMs, prometheus_url, envs, exper
             f"export QUERY_INTERVAL={env_vars['QUERY_INTERVAL']} && "
             f"export EXPERIMENT_DURATION={EXPERIMENT_DURATION} && "
             f"export SEED={env_vars['SEED']} && "
-            f"python3 scripts/query_component.py &"
+            f"export GCS_BUCKET_NAME='prometheus-benchmarking-app-logs' && "
+            f"python3 query_component.py &"
         )
         subprocess.run(
             [
