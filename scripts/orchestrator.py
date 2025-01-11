@@ -24,13 +24,13 @@ def initialize_load_generators(load_generator_VMs, envs, zone, project_id):
     for i, vm_name in enumerate(load_generator_VMs):
         env_vars = envs[i]
         command = (
-            f"git clone https://github.com/serdarakol/prometheus-benchmarking.git &&"
-            f"cd prometheus-benchmarking && "
+            f"git clone https://github.com/serdarakol/load_generator.git &&"
+            f"cd load_generator && "
             f"export LOG_FILE=load_generator_{i}.log && "
             f"export START_PORT={env_vars['START_PORT']} && "
             f"export NUM_TARGETS={env_vars['NUM_TARGETS']} && "
             f"export SEED={env_vars['SEED']} && "
-            f"python3 scripts/load_generator.py &"
+            f"python3 load_generator.py &"
         )
         subprocess.run(
             [
