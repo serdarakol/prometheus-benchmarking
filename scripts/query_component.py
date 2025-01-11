@@ -19,7 +19,7 @@ random.seed(SEED)
 
 
 GCS_BUCKET_NAME='prometheus-benchmarking-app-logs'
-GCS_FILE_NAME=f'{EXPERIMENT_ID}/query_logs/{LOG_FILE}'
+GCS_FILE_NAME=f'experiment_{EXPERIMENT_ID}/query_logs/{LOG_FILE}'
 
 class QueryComponent:
     def __init__(self):

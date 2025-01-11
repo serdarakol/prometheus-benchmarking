@@ -9,8 +9,8 @@ __pycache__/
 data/
 
 terraform/.terraform/
-terraform/.terraform.lock.hcl
-terraform/terraform.tfstate
+terraform/.terraform*
+terraform/terraform.tfstate*
 
 # Distribution / packaging
 .Python

@@ -1,5 +1,6 @@
 variable "project_id" {
   description = "Google Cloud project ID"
+  default     = "prometheus-benchmarking-app"
 }
 
 variable "region" {

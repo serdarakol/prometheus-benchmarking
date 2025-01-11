@@ -30,18 +30,41 @@ def generate_prometheus_config(scrape_targets, scrape_interval, is_leaf):
     return config
 
 
-def upload_config(ip, config):
-    config_path = "/etc/prometheus/prometheus.yml"
-    temp_file = f"./prometheus_{ip.replace('.', '_')}.yml"
-
+def upload_config(vm_name, zone, project_id, config):
+    # Created a temporary file for the Prometheus config
+    temp_file = f"tmp/prometheus_{vm_name.replace('.', '_')}.yml"
     with open(temp_file, "w") as f:
         yaml.dump(config, f)
 
-    subprocess.run(["scp", temp_file, f"user@{ip}:{config_path}"])
+    # Path to store the config file on the VM
+    remote_path = "prometheus.yml"
 
-    restart_script = f"""
+    # Upload the config file to the VM using gcloud compute scp
+    subprocess.run(
+        [
+            "gcloud", "compute", "scp", temp_file,
+            f"{vm_name}:{remote_path}",
+            "--zone", zone,
+            "--project", project_id,
+        ],
+        check=True,
+    )
+    print(f"Uploaded {temp_file} to {vm_name}:{remote_path}")
+
+    # SSH into the VM to move the config file and restart Prometheus
+    ssh_command = f"""
     sudo systemctl restart prometheus
     """
-    subprocess.run(["ssh", f"user@{ip}", restart_script])
+    subprocess.run(
+        [
+            "gcloud", "compute", "ssh", vm_name,
+            "--zone", zone,
+            "--project", project_id,
+            "--command", ssh_command,
+        ],
+        check=True,
+    )
+    print(f"Prometheus on {vm_name} restarted with the new configuration.")
 
     # os.remove(temp_file)
+    # print(f"Temporary file {temp_file} removed.")
