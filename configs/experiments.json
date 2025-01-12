@@ -25,7 +25,7 @@
                 "count": 1,
                 "envs": [
                     {
-                        "QUERY_LIST": ["rate(metric_0[1m])"],
+                        "QUERY_LIST": ["rate(metric_0[1m])", "rate(metric_1[1m])"],
                         "QUERY_INTERVAL": 1,
                         "SEED": 42
                     }

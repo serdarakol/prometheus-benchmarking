@@ -47,6 +47,7 @@ def initialize_single_load_generator(vm_name, env_vars, zone, project_id, i):
     )
     print(f"Initialized load generator {i} on {vm_name}")
 
+
 def initialize_load_generators(load_generator_VMs, envs, zone, project_id):
     with ThreadPoolExecutor() as executor:
         for i, vm_name in enumerate(load_generator_VMs):
@@ -130,7 +131,7 @@ def initialize_prometheus(prometheus_VMs, load_generator_server_ips, load_genera
 def upload_logs_to_gcs(experiment_id):
     subprocess.run(
         [
-            "gsutil", "-m", "cp", "-r", f"logs/experiment_{experiment_id}",
+            "gsutil", "-m", "cp", "-r", f"logs/experiment_{experiment_id}/",
             f"gs://prometheus-benchmarking-app-logs/experiment_{experiment_id}"
         ]
     )
