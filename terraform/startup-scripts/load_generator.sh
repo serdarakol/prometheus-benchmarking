@@ -6,3 +6,5 @@ sudo apt-get install -y git
 pip3 install prometheus_client
 
 echo "Load generator ready."
+
+touch /tmp/startup_ready

@@ -17,24 +17,15 @@ benchmarking-prometheus-latency/
 │   ├── main.tf             # Main Terraform script
 │   ├── variables.tf        # Terraform variables
 │   ├── outputs.tf          # Terraform outputs
-│   ├── load_generator.tf   # Terraform script for load generators
-│   ├── prometheus.tf       # Terraform script for Prometheus deployment
-│   └── query_component.tf  # Terraform script for query components
+│   └── startup-scripts     #startup script folder
+│       ├── load_generator.sh
+│       ├── prometheus.sh
+│       └── query_component.sh
 ├── scripts/                # Python scripts for load generation, querying, and orchestration
-│   ├── load_generator.py   # Load generator script
-│   ├── query_component.py  # Querying component script
-│   ├── prometheus_config_generator.py # Generates Prometheus configuration
+│   ├── prometheus.py       # Generates Prometheus configuration
 │   └── orchestrator.py     # Orchestrates the experiments
-├── docker/                 # Dockerfiles for components (optional)
-│   ├── Dockerfile.load     # Dockerfile for load generator
-│   ├── Dockerfile.query    # Dockerfile for query component
-│   └── Dockerfile.prometheus  # Dockerfile for Prometheus
-├── logs/                   # Logs from experiments
-│   ├── raw/                # Raw logs from components
-│   ├── refined/            # Processed logs for analysis
-│   └── analysis/           # Analysis results
-├── results/                # Experiment results
-│   └── experiment_01/      # Separate folder for each experiment
+├── logs/                   # Logs from experiments (also uploaded to the google cloud storage)
+│   ├── experiment_{experiment_id}
 ├── .env                    # Environment variables file
 └── README.md               # Documentation for the repository
 

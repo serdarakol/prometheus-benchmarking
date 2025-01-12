@@ -1,7 +1,7 @@
 import yaml
 import subprocess
 import os
-
+import time
 def generate_prometheus_config(scrape_targets, scrape_interval, is_leaf):
     config = {
         "global": {
@@ -32,7 +32,10 @@ def generate_prometheus_config(scrape_targets, scrape_interval, is_leaf):
 
 def upload_config(vm_name, zone, project_id, config):
     # Created a temporary file for the Prometheus config
-    temp_file = f"tmp/prometheus_{vm_name.replace('.', '_')}.yml"
+    tmp_dir = "tmp"
+    os.makedirs(tmp_dir, exist_ok=True)  # Create the tmp directory if it doesn't exist
+
+    temp_file = f"tmp/{vm_name.replace('.', '_')}.yml"
     with open(temp_file, "w") as f:
         yaml.dump(config, f)
 
@@ -52,6 +55,7 @@ def upload_config(vm_name, zone, project_id, config):
     print(f"Uploaded {temp_file} to {vm_name}:{remote_path}")
 
     # SSH into the VM to move the config file and restart Prometheus
+    wait_for_startup(vm_name, zone, project_id)
     ssh_command = f"""
     sudo systemctl restart prometheus
     """
@@ -68,3 +72,20 @@ def upload_config(vm_name, zone, project_id, config):
 
     # os.remove(temp_file)
     # print(f"Temporary file {temp_file} removed.")
+
+
+def wait_for_startup(vm_name, zone, project_id):
+    while True:
+        result = subprocess.run(
+            [
+                "gcloud", "compute", "ssh", vm_name,
+                "--zone", zone,
+                "--project", project_id,
+                "--command", "test -f /tmp/startup_ready && echo READY || echo NOT_READY"
+            ],
+            capture_output=True, text=True
+        )
+        if "READY" in result.stdout:
+            print(f"{vm_name} is ready.")
+            break
+        time.sleep(10)  # Check again in 10 seconds
