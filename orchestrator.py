@@ -54,8 +54,10 @@ def initialize_load_generators(load_generator_VMs, envs, zone, project_id):
             executor.submit(initialize_single_load_generator, vm_name, envs[i], zone, project_id, i)
 
 
-def initialize_single_query_component(vm_name, prometheus_url, env_vars, experiment_id, EXPERIMENT_DURATION, zone, project_id, i):
+def initialize_single_query_component(vm_name, prometheus_url, env_vars, EXPERIMENT_DURATION, zone, project_id, i):
     wait_for_startup(vm_name, zone, project_id)
+
+    query_list_json = json.dumps(env_vars["QUERY_LIST"]).replace('"', '\\"')
     command = (
         f"while sudo fuser /var/lib/dpkg/lock-frontend >/dev/null 2>&1; do echo 'Waiting for APT lock...'; sleep 5; done && "
         f"sudo apt-get install -y git && "
@@ -63,35 +65,30 @@ def initialize_single_query_component(vm_name, prometheus_url, env_vars, experim
         f"cd query_component && "
         f"echo Running export commands... && "
         f"export PROMETHEUS_URL={prometheus_url} && "
-        f"export QUERY_LIST={env_vars['QUERY_LIST']} && "
-        f"export EXPERIMENT_ID={experiment_id} && "
+        f"export QUERY_LIST=\"{query_list_json}\" && "
         f"export LOG_FILE=query_component_{i}.json && "
         f"export QUERY_INTERVAL={env_vars['QUERY_INTERVAL']} && "
         f"export EXPERIMENT_DURATION={EXPERIMENT_DURATION} && "
         f"export SEED={env_vars['SEED']} && "
-        f"export GCS_BUCKET_NAME='prometheus-benchmarking-app-logs' && "
         f"pip3 install requests && "
-        f"pip3 install google-cloud-storage && "
-        f"nohup python3 query_component.py > query_component.log 2>&1 & disown"
+        f"python3 query_component.py &"
     )
-    print(f"Executing command on {vm_name}: {command}")
-    subprocess.Popen(
+    print(f"Executing query component on {vm_name} VM")
+    print(f"Command: {command}")
+    subprocess.run(
         [
             "gcloud", "compute", "ssh", vm_name,
             "--zone", zone,
             "--project", project_id,
             "--command", command
-        ],
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL,
+        ]
     )
-    print(f"Initialized query component {i} on {vm_name}")
 
 
-def initialize_query_components(query_component_VMs, prometheus_url, envs, experiment_id, EXPERIMENT_DURATION, zone, project_id):
+def initialize_query_components(query_component_VMs, prometheus_url, envs, EXPERIMENT_DURATION, zone, project_id):
     with ThreadPoolExecutor() as executor:
         for i, vm_name in enumerate(query_component_VMs):
-            executor.submit(initialize_single_query_component, vm_name, prometheus_url, envs[i], experiment_id, EXPERIMENT_DURATION, zone, project_id, i)
+            executor.submit(initialize_single_query_component, vm_name, prometheus_url, envs[i], EXPERIMENT_DURATION, zone, project_id, i)
 
 
 def initialize_prometheus(prometheus_VMs, load_generator_server_ips, load_generator_envs, scrape_interval, zone, project_id):
@@ -128,11 +125,11 @@ def initialize_prometheus(prometheus_VMs, load_generator_server_ips, load_genera
     upload_config(central_instance, zone, project_id, central_config)
 
 
-def upload_logs_to_gcs(experiment_id):
+def upload_logs_to_gcs(path):
     subprocess.run(
         [
-            "gsutil", "-m", "cp", "-r", f"logs/experiment_{experiment_id}/",
-            f"gs://prometheus-benchmarking-app-logs/experiment_{experiment_id}"
+            "gsutil", "-m", "cp", "-r", f"{path}",
+            f"gs://prometheus-benchmarking-app-logs"
         ]
     )
 
@@ -196,18 +193,16 @@ def run_experiment(experiment, experiment_id):
 
     initialize_prometheus(prometheus_VMs, load_generator_ips, load_generator_envs, scrape_interval, zone, project_id)
 
-    central_prometheus_url = f"{prometheus_ips[0]}:9090"
+    central_prometheus_url = f"http://{prometheus_ips[0]}:9090/api/v1/query"
     query_component_envs = experiment["query_components"]["envs"]
-    initialize_query_components(query_component_VMs, central_prometheus_url, query_component_envs, experiment_id, EXPERIMENT_DURATION, zone, project_id)
+    initialize_query_components(query_component_VMs, central_prometheus_url, query_component_envs, EXPERIMENT_DURATION, zone, project_id)
 
-    # Step 4: Run Experiment
-    print(f"Experiment running for {EXPERIMENT_DURATION} seconds...")
-    time.sleep(EXPERIMENT_DURATION)
-
-    log_path = f"logs/experiment_{experiment_id}"
+    epoch_time = int(time.time())
+    log_path = f"logs/{experiment_id}/{epoch_time}"
     os.makedirs(log_path, exist_ok=True)
     os.makedirs(f"{log_path}/load_generator_logs", exist_ok=True)
     os.makedirs(f"{log_path}/prometheus_responses", exist_ok=True)
+    os.makedirs(f"{log_path}/query_component_logs", exist_ok=True)
 
     # Step 5: Retrieve Load Generator Logs
     for i, vm_name in enumerate(load_generator_VMs):
@@ -215,7 +210,7 @@ def run_experiment(experiment, experiment_id):
             [
                 "gcloud", "compute", "scp",
                 f"{vm_name}:load_generator/load_generator_{i}.log",
-                f"logs/experiment_{experiment_id}/load_generator_logs/load_generator_{i}.log",
+                f"{log_path}/load_generator_logs/load_generator_{i}.log",
                 "--zone", zone,
                 "--project", project_id
             ]
@@ -224,15 +219,34 @@ def run_experiment(experiment, experiment_id):
     # Step 6: Retrieve Prometheus metrics
     for i, prometheus_ip in enumerate(prometheus_ips):
         response = requests.get(f"http://{prometheus_ip}:9090/metrics")
-        with open(f"logs/experiment_{experiment_id}/prometheus_responses/prometheus_{i}.txt", "w") as f:
+        with open(f"{log_path}/prometheus_responses/prometheus_{i}.txt", "w") as f:
             f.write(response.text)
 
-    upload_logs_to_gcs(experiment_id)
+    # Step 7: Retrieve Query Component Logs
+    for i, vm_name in enumerate(query_component_VMs):
+        subprocess.run(
+            [
+                "gcloud", "compute", "scp",
+                f"{vm_name}:query_component/query_component_{i}.json",
+                f"{log_path}/query_component_logs/query_component_{i}.json",
+                "--zone", zone,
+                "--project", project_id
+            ]
+        )
+
+    # Step 8: Save the experiment configuration
+    with open(f"{log_path}/experiment.json", "w") as f:
+        json.dump(experiment, f, indent=4)
+
+    upload_logs_to_gcs(log_path)
 
     # Step 5: Cleanup
     print("Cleaning up resources...")
-    #run_terraform("destroy")
+    run_terraform("destroy")
 
+
+def get_experiment_id(experiment):
+    return f"experiment_{experiment['ZONE']}_p{experiment['prometheus_instances']['count']}_lg{experiment['load_generators']['count']}_qc{experiment['query_components']['count']}"
 
 if __name__ == "__main__":
     print("Orchestrator started.")
@@ -240,6 +254,7 @@ if __name__ == "__main__":
     with open("configs/experiments.json") as f:
         experiments = json.load(f)["experiments"]
 
-    for experiment_id, experiment in enumerate(experiments, start=1):
+    for i, experiment in enumerate(experiments, start=1):
+        experiment_id = get_experiment_id(experiment)
         run_experiment(experiment, experiment_id)
         print(f"Experiment {experiment_id} completed.")

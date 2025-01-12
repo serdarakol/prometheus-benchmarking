@@ -23,19 +23,6 @@ resource "google_compute_firewall" "allow_all" {
   source_ranges = ["0.0.0.0/0"]
 }
 
-### SERVICE ACCOUNT
-resource "google_service_account" "vm_service_account" {
-  account_id   = "vm-storage-admin"
-  display_name = "VM Service Account for Storage Admin"
-}
-
-### SERVICE ACCOUNT IAM POLICY
-resource "google_project_iam_member" "vm_storage_admin_role" {
-  project = var.project_id
-  role    = "roles/storage.admin"
-  member  = "serviceAccount:${google_service_account.vm_service_account.email}"
-}
-
 resource "google_compute_instance" "load_generator" {
   count         = var.load_generator_count
   name          = "load-generator-${count.index}"
@@ -53,11 +40,6 @@ resource "google_compute_instance" "load_generator" {
     access_config {
       # Include this section to give the VM an external IP address
     }
-  }
-
-  service_account {
-    email = google_service_account.vm_service_account.email
-    scopes = ["https://www.googleapis.com/auth/devstorage.full_control"]
   }
 
   metadata_startup_script = file("startup-scripts/load_generator.sh")
@@ -102,11 +84,6 @@ resource "google_compute_instance" "query_component" {
     access_config {
       # Include this section to give the VM an external IP address
     }
-  }
-
-  service_account {
-    email  = google_service_account.vm_service_account.email
-    scopes = ["https://www.googleapis.com/auth/devstorage.full_control"]
   }
 
   metadata_startup_script = file("startup-scripts/query_component.sh")

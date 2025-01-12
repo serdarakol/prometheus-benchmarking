@@ -25,7 +25,7 @@ benchmarking-prometheus-latency/
 │   ├── prometheus.py       # Generates Prometheus configuration
 │   └── orchestrator.py     # Orchestrates the experiments
 ├── logs/                   # Logs from experiments (also uploaded to the google cloud storage)
-│   ├── experiment_{experiment_id}
+│   ├── {experiment_id}
 ├── .env                    # Environment variables file
 └── README.md               # Documentation for the repository
 

@@ -14,6 +14,7 @@ logs/
 
 terraform/.terraform/
 terraform/.terraform*
+terraform/terraform.tfvars
 terraform/terraform.tfstate*
 
 # Distribution / packaging
