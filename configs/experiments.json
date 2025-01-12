@@ -1,7 +1,7 @@
 {
     "experiments": [
         {
-            "EXPERIMENT_DURATION": 120,
+            "EXPERIMENT_DURATION": 60,
             "PROJECT": "prometheus-benchmarking-app",
             "REGION": "us-central1",
             "ZONE" : "us-central1-a",
@@ -33,7 +33,7 @@
             }
         },
         {
-            "EXPERIMENT_DURATION": 120,
+            "EXPERIMENT_DURATION": 60,
             "PROJECT": "prometheus-benchmarking-app",
             "REGION": "us-central1",
             "ZONE" : "us-central1-a",

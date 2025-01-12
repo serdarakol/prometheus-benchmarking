@@ -181,6 +181,7 @@ def run_experiment(experiment, experiment_id):
     # Step 2: Retrieve IP Addresses
     load_generator_ips = get_terraform_output("load_generator_ips")
     prometheus_ips = get_terraform_output("prometheus_ips")
+    query_component_ips = get_terraform_output("query_component_ips")
 
     print("Waiting for 1 minute before starting the experiment... to wait all the vms get ready")
     time.sleep(60)  # Wait for 1 minute before starting the experiment
@@ -234,6 +235,12 @@ def run_experiment(experiment, experiment_id):
             ]
         )
 
+    experiment["experiment_id"] = experiment_id
+    experiment["epoch_time"] = epoch_time
+    experiment["load_generator_ips"] = load_generator_ips
+    experiment["prometheus_ips"] = prometheus_ips
+    experiment["central_prometheus_url"] = central_prometheus_url
+    experiment["query_component_ips"] = query_component_ips
     # Step 8: Save the experiment configuration
     with open(f"{log_path}/experiment.json", "w") as f:
         json.dump(experiment, f, indent=4)
