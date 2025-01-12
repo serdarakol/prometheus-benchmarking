@@ -71,7 +71,7 @@ def initialize_single_query_component(vm_name, prometheus_url, env_vars, EXPERIM
         f"export EXPERIMENT_DURATION={EXPERIMENT_DURATION} && "
         f"export SEED={env_vars['SEED']} && "
         f"pip3 install requests && "
-        f"python3 query_component.py &"
+        f"python3 query_component.py "
     )
     print(f"Executing query component on {vm_name} VM")
     print(f"Command: {command}")
@@ -103,7 +103,7 @@ def initialize_prometheus(prometheus_VMs, load_generator_server_ips, load_genera
     new_scrape_targets = []  ## [[url1, url2, url3], [url4, url5, url6], ...]
     for i, target in enumerate(load_generator_server_ips):
         env_vars = load_generator_envs[i]
-        new_urls = [f"{target}:{env_vars['START_PORT'] + j}" for j in range(env_vars["NUM_TARGETS"])]
+        new_urls = [f"http://{target}:{env_vars['START_PORT'] + j}/metrics" for j in range(env_vars["NUM_TARGETS"])]
         new_scrape_targets.append(new_urls)
 
     # If 1 prometheus instance, it scrapes everything
@@ -125,11 +125,11 @@ def initialize_prometheus(prometheus_VMs, load_generator_server_ips, load_genera
     upload_config(central_instance, zone, project_id, central_config)
 
 
-def upload_logs_to_gcs(path):
+def upload_logs_to_gcs(path, experiment_id):
     subprocess.run(
         [
             "gsutil", "-m", "cp", "-r", f"{path}",
-            f"gs://prometheus-benchmarking-app-logs"
+            f"gs://prometheus-benchmarking-app-logs/{experiment_id}"
         ]
     )
 
@@ -238,7 +238,7 @@ def run_experiment(experiment, experiment_id):
     with open(f"{log_path}/experiment.json", "w") as f:
         json.dump(experiment, f, indent=4)
 
-    upload_logs_to_gcs(log_path)
+    upload_logs_to_gcs(log_path, experiment_id)
 
     # Step 5: Cleanup
     print("Cleaning up resources...")
