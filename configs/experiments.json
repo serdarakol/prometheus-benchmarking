@@ -1,23 +1,13 @@
 {
     "experiments": [
         {
-            "EXPERIMENT_DURATION": 300,
+            "EXPERIMENT_DURATION": 30,
             "PROJECT": "prometheus-benchmarking-app",
             "REGION": "us-central1",
             "ZONE" : "us-central1-a",
             "load_generators": {
-                "count": 3,
+                "count": 1,
                 "envs": [
-                    {
-                        "START_PORT": 8000,
-                        "NUM_TARGETS": 5,
-                        "SEED": 42
-                    },
-                    {
-                        "START_PORT": 8000,
-                        "NUM_TARGETS": 5,
-                        "SEED": 42
-                    },
                     {
                         "START_PORT": 8000,
                         "NUM_TARGETS": 5,
@@ -26,7 +16,7 @@
                 ]
             },
             "prometheus_instances": {
-                "count": 3,
+                "count": 1,
                 "env": {
                     "SCRAPE_INTERVAL": "1s"
                 }
