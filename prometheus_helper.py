@@ -2,6 +2,8 @@ import yaml
 import subprocess
 import os
 import time
+
+
 def generate_prometheus_config(scrape_targets, scrape_interval, is_leaf):
     config = {
         "global": {
@@ -56,17 +58,19 @@ def upload_config(vm_name, zone, project_id, config):
 
     # SSH into the VM to move the config file and restart Prometheus
     wait_for_startup(vm_name, zone, project_id)
-    ssh_command = f"""
-    sudo systemctl restart prometheus
-    """
-    subprocess.run(
+    ssh_command = (
+        f"sudo systemctl stop prometheus && "
+        f"sudo -u prometheus prometheus --config.file={remote_path} "
+    )
+    subprocess.Popen(
         [
             "gcloud", "compute", "ssh", vm_name,
             "--zone", zone,
             "--project", project_id,
             "--command", ssh_command,
         ],
-        check=True,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL
     )
     print(f"Prometheus on {vm_name} restarted with the new configuration.")
 

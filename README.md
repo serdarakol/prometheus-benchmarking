@@ -58,3 +58,8 @@ google_compute_network.vpc_network: Creating...
 
 
 scp command asks for permission
+
+
+
+dont forget to increase the quoatas for some experiment setups
+- such as exceeding 8 external ip addresses quotas

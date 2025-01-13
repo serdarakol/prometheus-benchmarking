@@ -103,16 +103,17 @@ def initialize_prometheus(prometheus_VMs, load_generator_server_ips, load_genera
     new_scrape_targets = []  ## [[url1, url2, url3], [url4, url5, url6], ...]
     for i, target in enumerate(load_generator_server_ips):
         env_vars = load_generator_envs[i]
-        new_urls = [f"http://{target}:{env_vars['START_PORT'] + j}/metrics" for j in range(env_vars["NUM_TARGETS"])]
+        new_urls = [f"{target}:{env_vars['START_PORT'] + j}" for j in range(env_vars["NUM_TARGETS"])]
         new_scrape_targets.append(new_urls)
 
     # If 1 prometheus instance, it scrapes everything
     if not leaf_instances:
         all_targets = [url for sublist in new_scrape_targets for url in sublist] # flattened
-        central_config = generate_prometheus_config(all_targets, scrape_interval, is_leaf=False)
+        central_config = generate_prometheus_config(all_targets, scrape_interval, is_leaf=True)
         upload_config(central_instance, zone, project_id, central_config)
         return
 
+    # number of prometheus instances can be 1, 3 or more. for 2, no federation and no benchmarking
     # Distribute load generator servers among leaf instances and give flattened targets
     for i, leaf_ip in enumerate(leaf_instances):
         leaf_targets = flatten_scrape_targets(new_scrape_targets, len(leaf_instances), i)
@@ -125,11 +126,11 @@ def initialize_prometheus(prometheus_VMs, load_generator_server_ips, load_genera
     upload_config(central_instance, zone, project_id, central_config)
 
 
-def upload_logs_to_gcs(path, experiment_id):
+def upload_logs_to_gcs(path, experiment_id, epoch_time):
     subprocess.run(
         [
             "gsutil", "-m", "cp", "-r", f"{path}",
-            f"gs://prometheus-benchmarking-app-logs/{experiment_id}"
+            f"gs://prometheus-benchmarking-app-logs/{experiment_id}/{epoch_time}"
         ]
     )
 
@@ -245,7 +246,7 @@ def run_experiment(experiment, experiment_id):
     with open(f"{log_path}/experiment.json", "w") as f:
         json.dump(experiment, f, indent=4)
 
-    upload_logs_to_gcs(log_path, experiment_id)
+    upload_logs_to_gcs(log_path, experiment_id, epoch_time)
 
     # Step 5: Cleanup
     print("Cleaning up resources...")

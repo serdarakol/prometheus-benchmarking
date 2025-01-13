@@ -1,45 +1,18 @@
 {
     "experiments": [
         {
-            "EXPERIMENT_DURATION": 60,
+            "EXPERIMENT_DURATION": 300,
             "PROJECT": "prometheus-benchmarking-app",
             "REGION": "us-central1",
             "ZONE" : "us-central1-a",
             "load_generators": {
-                "count": 1,
+                "count": 3,
                 "envs": [
                     {
                         "START_PORT": 8000,
                         "NUM_TARGETS": 5,
                         "SEED": 42
-                    }
-                ]
-            },
-            "prometheus_instances": {
-                "count": 1,
-                "env": {
-                    "SCRAPE_INTERVAL": "1s"
-                }
-            },
-            "query_components": {
-                "count": 1,
-                "envs": [
-                    {
-                        "QUERY_LIST": ["rate(metric_0[1m])", "rate(metric_1[1m])"],
-                        "QUERY_INTERVAL": 1,
-                        "SEED": 42
-                    }
-                ]
-            }
-        },
-        {
-            "EXPERIMENT_DURATION": 60,
-            "PROJECT": "prometheus-benchmarking-app",
-            "REGION": "us-central1",
-            "ZONE" : "us-central1-a",
-            "load_generators": {
-                "count": 2,
-                "envs": [
+                    },
                     {
                         "START_PORT": 8000,
                         "NUM_TARGETS": 5,
@@ -53,19 +26,14 @@
                 ]
             },
             "prometheus_instances": {
-                "count": 1,
+                "count": 3,
                 "env": {
                     "SCRAPE_INTERVAL": "1s"
                 }
             },
             "query_components": {
-                "count": 2,
+                "count": 1,
                 "envs": [
-                    {
-                        "QUERY_LIST": ["rate(metric_0[1m])", "rate(metric_1[1m])"],
-                        "QUERY_INTERVAL": 1,
-                        "SEED": 42
-                    },
                     {
                         "QUERY_LIST": ["rate(metric_0[1m])", "rate(metric_1[1m])"],
                         "QUERY_INTERVAL": 1,
