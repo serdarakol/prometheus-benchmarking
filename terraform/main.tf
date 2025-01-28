@@ -37,9 +37,7 @@ resource "google_compute_instance" "load_generator" {
 
   network_interface {
     network = google_compute_network.vpc_network.id
-    access_config {
-      # Include this section to give the VM an external IP address
-    }
+
   }
 
   metadata_startup_script = file("startup-scripts/load_generator.sh")
@@ -59,9 +57,6 @@ resource "google_compute_instance" "prometheus" {
 
   network_interface {
     network = google_compute_network.vpc_network.id
-    access_config {
-      # Include this section to give the VM an external IP address
-    }
   }
 
   metadata_startup_script = file("startup-scripts/prometheus.sh")
@@ -81,9 +76,7 @@ resource "google_compute_instance" "query_component" {
 
   network_interface {
     network = google_compute_network.vpc_network.id
-    access_config {
-      # Include this section to give the VM an external IP address
-    }
+
   }
 
   metadata_startup_script = file("startup-scripts/query_component.sh")

@@ -52,7 +52,7 @@ google_compute_network.vpc_network: Creating...
 │
 │   with google_compute_network.vpc_network,
 │   on main.tf line 8, in resource "google_compute_network" "vpc_network":
-│    8: resource "google_compute_network" "vpc_network" {
+│    8: resource "google_compute_network" "vpc_network"
 │
 ╵
 
