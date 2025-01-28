@@ -48,6 +48,7 @@ def initialize_single_query_component(vm_name, prometheus_url, env_vars, EXPERIM
         f"export QUERY_LIST=\"{query_list_json}\" && "
         f"export LOG_FILE=query_component_{i}.json && "
         f"export QUERY_INTERVAL={env_vars['QUERY_INTERVAL']} && "
+        f"export NUM_THREADS={env_vars['NUM_THREADS']} && "
         f"export EXPERIMENT_DURATION={EXPERIMENT_DURATION} && "
         f"export SEED={env_vars['SEED']} && "
         f"python3 query_component.py "

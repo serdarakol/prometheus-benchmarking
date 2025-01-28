@@ -1,16 +1,61 @@
 {
     "experiments": [
         {
-            "EXPERIMENT_DURATION": 30,
+            "EXPERIMENT_DURATION": 300,
             "PROJECT": "prometheus-benchmarking-app",
             "REGION": "us-central1",
             "ZONE" : "us-central1-a",
             "load_generators": {
-                "count": 1,
+                "count": 10,
                 "envs": [
                     {
                         "START_PORT": 8000,
-                        "NUM_TARGETS": 5,
+                        "NUM_TARGETS": 20,
+                        "SEED": 42
+                    },
+                    {
+                        "START_PORT": 8000,
+                        "NUM_TARGETS": 20,
+                        "SEED": 42
+                    },
+                    {
+                        "START_PORT": 8000,
+                        "NUM_TARGETS": 20,
+                        "SEED": 42
+                    },
+                    {
+                        "START_PORT": 8000,
+                        "NUM_TARGETS": 20,
+                        "SEED": 42
+                    },
+                    {
+                        "START_PORT": 8000,
+                        "NUM_TARGETS": 20,
+                        "SEED": 42
+                    },
+                    {
+                        "START_PORT": 8000,
+                        "NUM_TARGETS": 20,
+                        "SEED": 42
+                    },
+                    {
+                        "START_PORT": 8000,
+                        "NUM_TARGETS": 20,
+                        "SEED": 42
+                    },
+                    {
+                        "START_PORT": 8000,
+                        "NUM_TARGETS": 20,
+                        "SEED": 42
+                    },
+                    {
+                        "START_PORT": 8000,
+                        "NUM_TARGETS": 20,
+                        "SEED": 42
+                    },
+                    {
+                        "START_PORT": 8000,
+                        "NUM_TARGETS": 20,
                         "SEED": 42
                     }
                 ]
@@ -22,13 +67,39 @@
                 }
             },
             "query_components": {
-                "count": 1,
+                "count": 5,
                 "envs": [
                     {
-                        "QUERY_LIST": ["rate(metric_0[1m])", "rate(metric_1[1m])"],
+                        "QUERY_LIST": ["rate(metric_0[1m])", "sum(rate(metric_2[1m]))", "rate(metric_0[1m]) + rate(metric_1[1m])", "sum(rate(metric_0[1m])) / sum(rate(metric_1[1m]))"],
                         "QUERY_INTERVAL": 1,
+                        "NUM_THREADS": 10,
+                        "SEED": 42
+                    },
+                    {
+                        "QUERY_LIST": ["rate(metric_0[1m])", "sum(rate(metric_2[1m]))", "rate(metric_0[1m]) + rate(metric_1[1m])", "sum(rate(metric_0[1m])) / sum(rate(metric_1[1m]))"],
+                        "QUERY_INTERVAL": 1,
+                        "NUM_THREADS": 10,
+                        "SEED": 42
+                    },
+                    {
+                        "QUERY_LIST": ["rate(metric_0[1m])", "sum(rate(metric_2[1m]))", "rate(metric_0[1m]) + rate(metric_1[1m])", "sum(rate(metric_0[1m])) / sum(rate(metric_1[1m]))"],
+                        "QUERY_INTERVAL": 1,
+                        "NUM_THREADS": 10,
+                        "SEED": 42
+                    },
+                    {
+                        "QUERY_LIST": ["rate(metric_0[1m])", "sum(rate(metric_2[1m]))", "rate(metric_0[1m]) + rate(metric_1[1m])", "sum(rate(metric_0[1m])) / sum(rate(metric_1[1m]))"],
+                        "QUERY_INTERVAL": 1,
+                        "NUM_THREADS": 10,
+                        "SEED": 42
+                    },
+                    {
+                        "QUERY_LIST": ["rate(metric_0[1m])", "sum(rate(metric_2[1m]))", "rate(metric_0[1m]) + rate(metric_1[1m])", "sum(rate(metric_0[1m])) / sum(rate(metric_1[1m]))"],
+                        "QUERY_INTERVAL": 1,
+                        "NUM_THREADS": 10,
                         "SEED": 42
                     }
+
                 ]
             }
         }
