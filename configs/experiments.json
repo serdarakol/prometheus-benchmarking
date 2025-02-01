@@ -1,105 +1,63 @@
 {
     "experiments": [
         {
-            "EXPERIMENT_DURATION": 300,
+            "EXPERIMENT_DURATION": 150,
             "PROJECT": "prometheus-benchmarking-app",
             "REGION": "us-central1",
             "ZONE" : "us-central1-a",
             "load_generators": {
-                "count": 10,
+                "count": 1,
                 "envs": [
                     {
                         "START_PORT": 8000,
-                        "NUM_TARGETS": 20,
+                        "NUM_TARGETS": 200,
                         "SEED": 42
                     },
                     {
                         "START_PORT": 8000,
-                        "NUM_TARGETS": 20,
+                        "NUM_TARGETS": 200,
                         "SEED": 42
                     },
                     {
                         "START_PORT": 8000,
-                        "NUM_TARGETS": 20,
+                        "NUM_TARGETS": 200,
                         "SEED": 42
                     },
                     {
                         "START_PORT": 8000,
-                        "NUM_TARGETS": 20,
-                        "SEED": 42
-                    },
-                    {
-                        "START_PORT": 8000,
-                        "NUM_TARGETS": 20,
-                        "SEED": 42
-                    },
-                    {
-                        "START_PORT": 8000,
-                        "NUM_TARGETS": 20,
-                        "SEED": 42
-                    },
-                    {
-                        "START_PORT": 8000,
-                        "NUM_TARGETS": 20,
-                        "SEED": 42
-                    },
-                    {
-                        "START_PORT": 8000,
-                        "NUM_TARGETS": 20,
-                        "SEED": 42
-                    },
-                    {
-                        "START_PORT": 8000,
-                        "NUM_TARGETS": 20,
-                        "SEED": 42
-                    },
-                    {
-                        "START_PORT": 8000,
-                        "NUM_TARGETS": 20,
+                        "NUM_TARGETS": 200,
                         "SEED": 42
                     }
                 ]
             },
             "prometheus_instances": {
                 "count": 1,
+                "machine_type": "e2-micro",
                 "env": {
                     "SCRAPE_INTERVAL": "1s"
                 }
             },
             "query_components": {
-                "count": 5,
+                "count": 1,
                 "envs": [
                     {
                         "QUERY_LIST": ["rate(metric_0[1m])", "sum(rate(metric_2[1m]))", "rate(metric_0[1m]) + rate(metric_1[1m])", "sum(rate(metric_0[1m])) / sum(rate(metric_1[1m]))"],
-                        "QUERY_INTERVAL": 1,
-                        "NUM_THREADS": 10,
+                        "QUERY_INTERVAL": 0.25,
+                        "NUM_THREADS": 200,
                         "SEED": 42
                     },
                     {
                         "QUERY_LIST": ["rate(metric_0[1m])", "sum(rate(metric_2[1m]))", "rate(metric_0[1m]) + rate(metric_1[1m])", "sum(rate(metric_0[1m])) / sum(rate(metric_1[1m]))"],
-                        "QUERY_INTERVAL": 1,
-                        "NUM_THREADS": 10,
+                        "QUERY_INTERVAL": 0.25,
+                        "NUM_THREADS": 200,
                         "SEED": 42
                     },
                     {
                         "QUERY_LIST": ["rate(metric_0[1m])", "sum(rate(metric_2[1m]))", "rate(metric_0[1m]) + rate(metric_1[1m])", "sum(rate(metric_0[1m])) / sum(rate(metric_1[1m]))"],
-                        "QUERY_INTERVAL": 1,
-                        "NUM_THREADS": 10,
-                        "SEED": 42
-                    },
-                    {
-                        "QUERY_LIST": ["rate(metric_0[1m])", "sum(rate(metric_2[1m]))", "rate(metric_0[1m]) + rate(metric_1[1m])", "sum(rate(metric_0[1m])) / sum(rate(metric_1[1m]))"],
-                        "QUERY_INTERVAL": 1,
-                        "NUM_THREADS": 10,
-                        "SEED": 42
-                    },
-                    {
-                        "QUERY_LIST": ["rate(metric_0[1m])", "sum(rate(metric_2[1m]))", "rate(metric_0[1m]) + rate(metric_1[1m])", "sum(rate(metric_0[1m])) / sum(rate(metric_1[1m]))"],
-                        "QUERY_INTERVAL": 1,
-                        "NUM_THREADS": 10,
+                        "QUERY_INTERVAL": 0.25,
+                        "NUM_THREADS": 200,
                         "SEED": 42
                     }
-
                 ]
             }
         }

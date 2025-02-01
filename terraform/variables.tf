@@ -27,3 +27,8 @@ variable "query_component_count" {
   description = "Number of query component VMs"
   default     = 1
 }
+
+variable "prometheus_machine_type" {
+  description = "Machine type for Prometheus instances"
+  default     = "e2-micro"
+}

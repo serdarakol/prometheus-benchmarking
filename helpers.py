@@ -20,19 +20,38 @@ def wait_for_startup(vm_name, zone, project_id):
                 "gcloud", "compute", "ssh", vm_name,
                 "--zone", zone,
                 "--project", project_id,
+                "--internal-ip",
                 "--command", "test -f /tmp/startup_ready && echo READY || echo STARTUP_SCRIPT_RUNNING"
             ],
             capture_output=True, text=True
         )
-        if "READY" in result.stdout:
+
+        # Capture stdout and stderr for debugging
+        output = result.stdout.strip()
+        error_output = result.stderr.strip()
+
+        print(f"[DEBUG] Output from {vm_name}: '{output}'")
+        if error_output:
+            print(f"[ERROR] {vm_name} stderr: '{error_output}'")
+
+        if "READY" in output:
             print(f"{vm_name} is ready.")
             break
-        print(f"Waiting for {vm_name}'s startup script to complete...")
-        time.sleep(10)  # Check again in 10 seconds
+
+        print(f"Waiting for {vm_name}'s startup script to complete... result: {output or 'NO OUTPUT'}")
+        time.sleep(10)
+
+
+def prepare_gcloud_ssh():
+    subprocess.run(
+        [
+            "gcloud", "compute", "config-ssh"
+        ]
+    )
 
 
 def get_experiment_id(experiment):
-    return f"experiment_{experiment['ZONE']}_p{experiment['prometheus_instances']['count']}_lg{experiment['load_generators']['count']}_qc{experiment['query_components']['count']}"
+    return f"experiment_p{experiment['prometheus_instances']['count']}_m{experiment['prometheus_instances']['machine_type']}_lg{experiment['load_generators']['count']}x{experiment['load_generators']['envs'][0]['NUM_TARGETS']}_qc{experiment['query_components']['count']}x{experiment['query_components']['envs'][0]['NUM_THREADS']}"
 
 
 def create_folders_and_return_path(experiment_id):
@@ -43,6 +62,8 @@ def create_folders_and_return_path(experiment_id):
     os.makedirs(f"{log_path}/prometheus_responses", exist_ok=True)
     os.makedirs(f"{log_path}/query_component_logs", exist_ok=True)
     os.makedirs(f"{log_path}/prometheus_configs", exist_ok=True)
+    os.makedirs(f"{log_path}/analysis_result", exist_ok=True)
+
     return log_path, epoch_time
 
 
@@ -58,7 +79,8 @@ def save_log_files_to_local(load_generator_ips, prometheus_ips, query_component_
                 f"{vm_name}:load_generator/load_generator_{i}.log",
                 f"{log_path}/load_generator_logs/load_generator_{i}.log",
                 "--zone", zone,
-                "--project", project_id
+                "--project", project_id,
+                "--internal-ip",
             ]
         )
 
@@ -80,7 +102,8 @@ def save_log_files_to_local(load_generator_ips, prometheus_ips, query_component_
                 f"{vm_name}:query_component/query_component_{i}.json",
                 f"{log_path}/query_component_logs/query_component_{i}.json",
                 "--zone", zone,
-                "--project", project_id
+                "--project", project_id,
+                "--internal-ip",
             ]
         )
 

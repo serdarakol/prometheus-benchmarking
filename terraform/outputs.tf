@@ -5,7 +5,7 @@ output "load_generator_ips" {
 
 output "prometheus_ips" {
   value = [for instance in google_compute_instance.prometheus :
-           instance.network_interface[0].network_ip]
+           instance.network_interface[0].access_config[0].nat_ip]
 }
 
 output "query_component_ips" {

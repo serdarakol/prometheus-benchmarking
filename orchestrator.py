@@ -2,8 +2,9 @@ import subprocess
 import json
 import os
 from client_scripts import initialize_load_generators, initialize_query_components
-from helpers import create_folders_and_return_path, get_experiment_id, save_log_files_to_local, upload_logs_to_gcs
+from helpers import create_folders_and_return_path, get_experiment_id, prepare_gcloud_ssh, save_log_files_to_local, upload_logs_to_gcs
 from prometheus_scripts import initialize_prometheus
+from result_analyzer import analyze_raw_data_get_results
 
 
 def run_terraform(action, variables=None):
@@ -44,13 +45,17 @@ def run_experiment(experiment, experiment_id):
         "zone": zone,
         "load_generator_count": load_generator_count,
         "prometheus_count": prometheus_count,
-        "query_component_count": query_component_count
+        "query_component_count": query_component_count,
+        "prometheus_machine_type": experiment["prometheus_instances"]["machine_type"],
     })
 
     # Step 2: Retrieve IP Addresses
     load_generator_ips = get_terraform_output("load_generator_ips")
     prometheus_ips = get_terraform_output("prometheus_ips")
     query_component_ips = get_terraform_output("query_component_ips")
+
+    prepare_gcloud_ssh()
+    print("initialized gcloud ssh")
 
     # Step 3: Initialize Components
     load_generator_envs = experiment["load_generators"]["envs"]
@@ -66,6 +71,8 @@ def run_experiment(experiment, experiment_id):
 
     # Retrieve log files save to local and upload to GCS
     save_log_files_to_local(load_generator_ips, prometheus_ips, query_component_ips, experiment, log_path, zone, project_id)
+
+    analyze_raw_data_get_results(log_path, EXPERIMENT_DURATION)
 
     upload_logs_to_gcs(log_path, experiment_id, epoch_time)
 

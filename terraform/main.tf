@@ -37,7 +37,6 @@ resource "google_compute_instance" "load_generator" {
 
   network_interface {
     network = google_compute_network.vpc_network.id
-
   }
 
   metadata_startup_script = file("startup-scripts/load_generator.sh")
@@ -46,7 +45,7 @@ resource "google_compute_instance" "load_generator" {
 resource "google_compute_instance" "prometheus" {
   count         = var.prometheus_count
   name          = "prometheus-${count.index}"
-  machine_type  = "e2-standard-4"
+  machine_type  = var.prometheus_machine_type
   zone          = var.zone
 
   boot_disk {
@@ -57,6 +56,9 @@ resource "google_compute_instance" "prometheus" {
 
   network_interface {
     network = google_compute_network.vpc_network.id
+    access_config {
+      # adds external ip
+    }
   }
 
   metadata_startup_script = file("startup-scripts/prometheus.sh")
@@ -76,7 +78,6 @@ resource "google_compute_instance" "query_component" {
 
   network_interface {
     network = google_compute_network.vpc_network.id
-
   }
 
   metadata_startup_script = file("startup-scripts/query_component.sh")
