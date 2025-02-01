@@ -4,16 +4,10 @@ provider "google" {
   zone    = var.zone
 }
 
-### NETWORK
-resource "google_compute_network" "vpc_network" {
-  name = "benchmark-network"
-  auto_create_subnetworks = true
-}
-
 ### FIREWALL
 resource "google_compute_firewall" "allow_all" {
   name = "allow-all"
-  network = google_compute_network.vpc_network.id
+  network = "default"
 
   allow {
     protocol = "tcp"
@@ -36,7 +30,7 @@ resource "google_compute_instance" "load_generator" {
   }
 
   network_interface {
-    network = google_compute_network.vpc_network.id
+    network = "default"
   }
 
   metadata_startup_script = file("startup-scripts/load_generator.sh")
@@ -55,7 +49,7 @@ resource "google_compute_instance" "prometheus" {
   }
 
   network_interface {
-    network = google_compute_network.vpc_network.id
+    network = "default"
     access_config {
       # adds external ip
     }
@@ -77,7 +71,7 @@ resource "google_compute_instance" "query_component" {
   }
 
   network_interface {
-    network = google_compute_network.vpc_network.id
+    network = "default"
   }
 
   metadata_startup_script = file("startup-scripts/query_component.sh")
