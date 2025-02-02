@@ -65,7 +65,7 @@ resource "google_project_iam_member" "orchestrator_iam_ssh" {
 
 # Grant Storage Admin role to the orchestrator service account
 resource "google_project_iam_member" "orchestrator_storage_admin" {
-  project = var.project_id
+  project = "prometheus-benchmarking-app"
   role    = "roles/storage.admin"
   member  = "serviceAccount:${google_service_account.orchestrator_sa.email}"
 }
