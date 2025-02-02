@@ -8,11 +8,14 @@ from result_analyzer import analyze_raw_data_get_results
 
 
 def run_terraform(action, variables=None):
-    if variables:
-        with open("terraform/terraform.tfvars", "w") as f:
-            for key, value in variables.items():
-                f.write(f"{key} = {json.dumps(value)}\n")
-    subprocess.run(["terraform", action, "-auto-approve"], cwd="terraform")
+    if(action == "init"):
+        subprocess.run(["terraform", "init"], cwd="terraform")
+    else:
+        if variables:
+            with open("terraform/terraform.tfvars", "w") as f:
+                for key, value in variables.items():
+                    f.write(f"{key} = {json.dumps(value)}\n")
+        subprocess.run(["terraform", action, "-auto-approve"], cwd="terraform")
 
 
 def get_terraform_output(output_name):
