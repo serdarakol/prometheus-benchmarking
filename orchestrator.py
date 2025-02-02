@@ -37,7 +37,7 @@ def run_experiment(experiment, experiment_id):
     prometheus_VMs = [f"prometheus-{i}" for i in range(prometheus_count)]
     query_component_VMs = [f"query-component-{i}" for i in range(query_component_count)]
 
-
+    run_terraform("init")
     # Step 1: Deploying all infrastructure
     run_terraform("apply", {
         "project_id": project_id,
@@ -54,8 +54,8 @@ def run_experiment(experiment, experiment_id):
     prometheus_ips = get_terraform_output("prometheus_ips")
     query_component_ips = get_terraform_output("query_component_ips")
 
-    prepare_gcloud_ssh()
-    print("initialized gcloud ssh")
+    ##prepare_gcloud_ssh()
+    ##print("initialized gcloud ssh")
 
     # Step 3: Initialize Components
     load_generator_envs = experiment["load_generators"]["envs"]
