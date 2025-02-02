@@ -22,7 +22,6 @@ def initialize_single_load_generator(vm_name, env_vars, zone, project_id, i):
             "gcloud", "compute", "ssh", vm_name,
             "--zone", zone,
             "--project", project_id,
-            "--internal-ip",
             "--command", command
         ],
         stdout=subprocess.DEVNULL,
@@ -61,7 +60,6 @@ def initialize_single_query_component(vm_name, prometheus_url, env_vars, EXPERIM
             "gcloud", "compute", "ssh", vm_name,
             "--zone", zone,
             "--project", project_id,
-            "--internal-ip",
             "--command", command
         ]
     )

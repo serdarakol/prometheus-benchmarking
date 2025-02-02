@@ -20,7 +20,6 @@ def wait_for_startup(vm_name, zone, project_id):
                 "gcloud", "compute", "ssh", vm_name,
                 "--zone", zone,
                 "--project", project_id,
-                "--internal-ip",
                 "--command", "test -f /tmp/startup_ready && echo READY || echo STARTUP_SCRIPT_RUNNING"
             ],
             capture_output=True, text=True
@@ -80,7 +79,6 @@ def save_log_files_to_local(load_generator_ips, prometheus_ips, query_component_
                 f"{log_path}/load_generator_logs/load_generator_{i}.log",
                 "--zone", zone,
                 "--project", project_id,
-                "--internal-ip",
             ]
         )
 
@@ -103,7 +101,6 @@ def save_log_files_to_local(load_generator_ips, prometheus_ips, query_component_
                 f"{log_path}/query_component_logs/query_component_{i}.json",
                 "--zone", zone,
                 "--project", project_id,
-                "--internal-ip",
             ]
         )
 
