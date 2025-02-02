@@ -17,6 +17,11 @@ terraform/.terraform*
 terraform/terraform.tfvars
 terraform/terraform.tfstate*
 
+orchestrator_terraform/.terraform/
+orchestrator_terraform/.terraform*
+orchestrator_terraform/terraform.tfvars
+orchestrator_terraform/terraform.tfstate*
+
 # Distribution / packaging
 .Python
 build/
