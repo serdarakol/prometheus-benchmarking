@@ -142,8 +142,10 @@ def get_cpu_usage_for_single_vm(project_id, zone, vm_name, experiment_duration, 
     filter_str = f'metric.type="compute.googleapis.com/instance/cpu/utilization" AND resource.labels.instance_id="{instance_id}"'
 
     interval = monitoring_v3.TimeInterval(
-        {"start_time": {"seconds": int(start_time)}, "end_time": {"seconds": int(now)}}
+        start_time={"seconds": int(start_time)},
+        end_time={"seconds": int(now)}
     )
+
 
     request = {
         "name": project_name,
@@ -157,7 +159,7 @@ def get_cpu_usage_for_single_vm(project_id, zone, vm_name, experiment_duration, 
     cpu_data = []
     for result in results:
         for point in result.points:
-            cpu_data.append({"timestamp": point.interval.start_time.seconds, "value": point.value.double_value})
+            cpu_data.append({"timestamp": point.interval.start_time.timestamp(), "value": point.value.double_value})
 
     avg_cpu_usage = sum([data["value"] for data in cpu_data]) / len(cpu_data)
     result_json = {
@@ -171,7 +173,8 @@ def get_cpu_usage_for_all_vms(project_id, zone, vm_names, experiment_duration, l
     for vm_name in vm_names:
         get_cpu_usage_for_single_vm(project_id, zone, vm_name, experiment_duration, log_path)
 
-if __name__ == "__main__":
+def test1():
+    print("test1")
     with open("configs/experiments.json") as f:
         experiments = json.load(f)["experiments"]
     experiment = experiments[0]
@@ -183,3 +186,6 @@ if __name__ == "__main__":
 ], [
   "34.132.202.118",
 ], experiment, "logs/experiment_p1_me2-micro_lg2x500_qc1x200/1738518478", "us-central1-a", "prometheus-benchmarking-app")
+
+if __name__ == "__main__":
+    get_cpu_usage_for_all_vms("prometheus-benchmarking-app", "us-central1-a", ["load-generator-0", "load-generator-1"], 600, "logs/experiment_p1_me2-micro_lg2x50_qc2x100/1738524193")
