@@ -62,3 +62,10 @@ resource "google_project_iam_member" "orchestrator_iam_ssh" {
   role    = "roles/iam.serviceAccountUser"
   member  = "serviceAccount:${google_service_account.orchestrator_sa.email}"
 }
+
+# Grant Storage Admin role to the orchestrator service account
+resource "google_project_iam_member" "orchestrator_storage_admin" {
+  project = var.project_id
+  role    = "roles/storage.admin"
+  member  = "serviceAccount:${google_service_account.orchestrator_sa.email}"
+}

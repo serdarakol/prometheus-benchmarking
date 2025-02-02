@@ -2,8 +2,7 @@ export DEBIAN_FRONTEND=noninteractive
 sudo apt-get update
 sudo apt-get install -y python3-pip
 sudo apt-get install -y git
-sudo apt install -y python3.11-venv
-
+sudo apt-get install -y python3-venv
 
 #installing terraform
 sudo apt-get update && sudo apt-get install -y gnupg software-properties-common
