@@ -1,6 +1,7 @@
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, wait
 import subprocess
 import json
+import time
 
 from helpers import wait_for_startup
 
@@ -87,6 +88,26 @@ def initialize_single_query_component(vm_name, prometheus_url, env_vars, EXPERIM
 
 def initialize_query_components(query_component_VMs, prometheus_url, envs, EXPERIMENT_DURATION, zone, project_id):
     with ThreadPoolExecutor() as executor:
-        for i, vm_name in enumerate(query_component_VMs):
-            executor.submit(initialize_single_query_component, vm_name, prometheus_url, envs[i], EXPERIMENT_DURATION, zone, project_id, i)
+        future_to_vm = {
+            executor.submit(initialize_single_query_component, vm_name, prometheus_url, envs[i], EXPERIMENT_DURATION, zone, project_id, i): vm_name
+            for i, vm_name in enumerate(query_component_VMs)
+        }
 
+        done, not_done = wait(future_to_vm.keys(), timeout=(EXPERIMENT_DURATION + 60))
+
+        for future in done:
+            vm_name = future_to_vm[future]
+            try:
+                future.result()
+                print(f"initialized query component on {vm_name}")
+            except Exception as e:
+                print(f"Error initializing {vm_name}: {e}")
+
+        if not_done:
+            print(f"timeout reached! {len(not_done)} query components did not complete in time.")
+            for future in not_done:
+                vm_name = future_to_vm[future]
+                print(f"{vm_name} executed but not finised, possiible hanging queries still")
+                future.cancel()
+
+    print("Initialization completed (or timed out). Moving on...")

@@ -10,19 +10,19 @@
                 "envs": [
                     {
                         "START_PORT": 8000,
-                        "NUM_TARGETS": 50,
+                        "NUM_TARGETS": 100,
                         "SEED": 42
                     },
                     {
                         "START_PORT": 8000,
-                        "NUM_TARGETS": 50,
+                        "NUM_TARGETS": 100,
                         "SEED": 42
                     }
                 ]
             },
             "prometheus_instances": {
                 "count": 1,
-                "machine_type": "e2-micro",
+                "machine_type": "e2-small",
                 "env": {
                     "SCRAPE_INTERVAL": "1s"
                 }
