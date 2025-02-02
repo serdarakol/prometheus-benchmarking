@@ -1,8 +1,8 @@
 import subprocess
 import json
 import os
-from client_scripts import initialize_load_generators, initialize_query_components
-from helpers import create_folders_and_return_path, get_experiment_id, prepare_gcloud_ssh, save_log_files_to_local, upload_logs_to_gcs
+from client_scripts import initialize_load_generators, initialize_query_components, stop_load_generators
+from helpers import create_folders_and_return_path, get_cpu_usage_for_all_vms, get_experiment_id, prepare_gcloud_ssh, save_log_files_to_local, upload_logs_to_gcs
 from prometheus_scripts import initialize_prometheus
 from result_analyzer import analyze_raw_data_get_results
 
@@ -57,9 +57,6 @@ def run_experiment(experiment, experiment_id):
     prometheus_ips = get_terraform_output("prometheus_ips")
     query_component_ips = get_terraform_output("query_component_ips")
 
-    ##prepare_gcloud_ssh()
-    ##print("initialized gcloud ssh")
-
     # Step 3: Initialize Components
     load_generator_envs = experiment["load_generators"]["envs"]
     initialize_load_generators(load_generator_VMs, load_generator_envs, zone, project_id)
@@ -72,6 +69,11 @@ def run_experiment(experiment, experiment_id):
     query_component_envs = experiment["query_components"]["envs"]
     initialize_query_components(query_component_VMs, central_prometheus_url, query_component_envs, EXPERIMENT_DURATION, zone, project_id)
 
+    all_vm_names = load_generator_VMs + prometheus_VMs + query_component_VMs
+    print("getting cpu usage for all vms")
+    get_cpu_usage_for_all_vms(project_id, zone, all_vm_names, EXPERIMENT_DURATION, log_path)
+
+    stop_load_generators(load_generator_VMs, zone, project_id)
     # Retrieve log files save to local and upload to GCS
     save_log_files_to_local(load_generator_ips, prometheus_ips, query_component_ips, experiment, log_path, zone, project_id)
 

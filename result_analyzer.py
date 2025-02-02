@@ -140,5 +140,5 @@ def analyze_raw_data_get_results(log_path, experiment_duration):
 
 ### for testing
 if __name__ == "__main__":
-    log_path = "logs/experiment_us-central1-a_p1_lg4_qc3/1738409596"
-    analyze_raw_data_get_results(log_path, 150)
+    log_path = "logs/experiment_p1_me2-micro_lg2x500_qc1x200/1738518478"
+    analyze_raw_data_get_results(log_path, 600)

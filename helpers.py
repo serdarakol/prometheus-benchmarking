@@ -3,6 +3,8 @@ import time
 import os
 import json
 import requests
+from google.cloud import monitoring_v3, compute_v1
+import time
 
 def upload_logs_to_gcs(path, experiment_id, epoch_time):
     subprocess.run(
@@ -62,6 +64,7 @@ def create_folders_and_return_path(experiment_id):
     os.makedirs(f"{log_path}/query_component_logs", exist_ok=True)
     os.makedirs(f"{log_path}/prometheus_configs", exist_ok=True)
     os.makedirs(f"{log_path}/analysis_result", exist_ok=True)
+    os.makedirs(f"{log_path}/cpu_usages", exist_ok=True)
 
     return log_path, epoch_time
 
@@ -84,13 +87,18 @@ def save_log_files_to_local(load_generator_ips, prometheus_ips, query_component_
 
     print("Retrieved Load Generator Logs")
 
-    # Retrieve Prometheus metrics
-    for i, prometheus_ip in enumerate(prometheus_ips):
-        response = requests.get(f"http://{prometheus_ip}:9090/metrics")
-        with open(f"{log_path}/prometheus_responses/prometheus_{i}.txt", "w") as f:
-            f.write(response.text)
+    try:
+        # Retrieve Prometheus metrics
+        for i, prometheus_ip in enumerate(prometheus_ips):
+            response = requests.get(f"http://{prometheus_ip}:9090/metrics")
+            with open(f"{log_path}/prometheus_responses/prometheus_{i}.txt", "w") as f:
+                f.write(response.text)
 
-    print("Retrieved Prometheus Metrics")
+        print("Retrieved Prometheus Metrics")
+    except Exception as e:
+        print(f"Failed to retrieve Prometheus metrics: {e}")
+        with open(f"{log_path}/prometheus_responses/prometheus_error.txt", "w") as f:
+            f.write(str(e))
 
     # Retrieve Query Component Logs
     for i, vm_name in enumerate(query_component_VMs):
@@ -114,3 +122,64 @@ def save_log_files_to_local(load_generator_ips, prometheus_ips, query_component_
     # Step 8: Save the experiment configuration
     with open(f"{log_path}/experiment.json", "w") as f:
         json.dump(experiment, f, indent=4)
+
+
+def get_instance_id(project_id, zone, vm_name):
+    """Retrieves the instance ID for a given VM name."""
+    client = compute_v1.InstancesClient()
+    instance = client.get(project=project_id, zone=zone, instance=vm_name)
+    return instance.id  # Returns the numeric instance ID
+
+
+def get_cpu_usage_for_single_vm(project_id, zone, vm_name, experiment_duration, log_path):
+    instance_id = get_instance_id(project_id, zone, vm_name)
+    client = monitoring_v3.MetricServiceClient()
+
+    now = time.time()
+    start_time = now - experiment_duration
+
+    project_name = f"projects/{project_id}"
+    filter_str = f'metric.type="compute.googleapis.com/instance/cpu/utilization" AND resource.labels.instance_id="{instance_id}"'
+
+    interval = monitoring_v3.TimeInterval(
+        {"start_time": {"seconds": int(start_time)}, "end_time": {"seconds": int(now)}}
+    )
+
+    request = {
+        "name": project_name,
+        "filter": filter_str,
+        "interval": interval,
+        "view": monitoring_v3.ListTimeSeriesRequest.TimeSeriesView.FULL,
+    }
+
+    results = client.list_time_series(request)
+
+    cpu_data = []
+    for result in results:
+        for point in result.points:
+            cpu_data.append({"timestamp": point.interval.start_time.seconds, "value": point.value.double_value})
+
+    avg_cpu_usage = sum([data["value"] for data in cpu_data]) / len(cpu_data)
+    result_json = {
+        "avg_cpu_usage": avg_cpu_usage,
+        "cpu_data": cpu_data,
+    }
+    with open(f"{log_path}/cpu_usages/{vm_name}.json", "w") as f:
+        json.dump(result_json, f, indent=4)
+
+def get_cpu_usage_for_all_vms(project_id, zone, vm_names, experiment_duration, log_path):
+    for vm_name in vm_names:
+        get_cpu_usage_for_single_vm(project_id, zone, vm_name, experiment_duration, log_path)
+
+if __name__ == "__main__":
+    with open("configs/experiments.json") as f:
+        experiments = json.load(f)["experiments"]
+    experiment = experiments[0]
+    save_log_files_to_local([
+  "35.225.15.48",
+  "35.192.23.164",
+],  [
+  "34.59.252.243",
+], [
+  "34.132.202.118",
+], experiment, "logs/experiment_p1_me2-micro_lg2x500_qc1x200/1738518478", "us-central1-a", "prometheus-benchmarking-app")

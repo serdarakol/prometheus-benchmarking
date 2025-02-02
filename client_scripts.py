@@ -36,6 +36,25 @@ def initialize_load_generators(load_generator_VMs, envs, zone, project_id):
             executor.submit(initialize_single_load_generator, vm_name, envs[i], zone, project_id, i)
 
 
+def stop_single_load_generator(vm_name, zone, project_id):
+    print(f"Stopping load generator on {vm_name}")
+    subprocess.run(
+        [
+            "gcloud", "compute", "ssh", vm_name,
+            "--zone", zone,
+            "--project", project_id,
+            "--command", "pkill -f load_generator.py"
+        ]
+    )
+    print(f"Stopped load generator on {vm_name}")
+
+
+def stop_load_generators(load_generator_VMs, zone, project_id):
+    with ThreadPoolExecutor() as executor:
+        for vm_name in load_generator_VMs:
+            executor.submit(stop_single_load_generator, vm_name, zone, project_id)
+
+
 def initialize_single_query_component(vm_name, prometheus_url, env_vars, EXPERIMENT_DURATION, zone, project_id, i):
     wait_for_startup(vm_name, zone, project_id)
 
