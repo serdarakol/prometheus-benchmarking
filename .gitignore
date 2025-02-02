@@ -17,10 +17,10 @@ terraform/.terraform*
 terraform/terraform.tfvars
 terraform/terraform.tfstate*
 
-orchestrator_terraform/.terraform/
-orchestrator_terraform/.terraform*
-orchestrator_terraform/terraform.tfvars
-orchestrator_terraform/terraform.tfstate*
+orchestrator_terroform/.terraform/
+orchestrator_terroform/.terraform*
+orchestrator_terroform/terraform.tfvars
+orchestrator_terroform/terraform.tfstate*
 
 # Distribution / packaging
 .Python
