@@ -5,9 +5,21 @@ from helpers import wait_for_startup
 
 def initialize_prometheus(prometheus_VMs, load_generator_server_ips, load_generator_envs, scrape_interval, zone, project_id, log_path):
     ## distribute load generators among prometheus instances and flatten the list
-    def flatten_scrape_targets(load_generator_server_ips, step, offset):
-        return [url for i, sublist in enumerate(load_generator_server_ips[offset::step]) for url in sublist]
-
+    def distribute_targets_evenly(targets_list, num_chunks):
+        # First, flatten the list of lists.
+        all_targets = [url for sublist in targets_list for url in sublist]
+        n = len(all_targets)
+        chunks = []
+        # Determine the base chunk size and how many chunks need an extra element.
+        base_size = n // num_chunks
+        remainder = n % num_chunks
+        start = 0
+        for i in range(num_chunks):
+            # The first 'remainder' chunks get one extra target.
+            chunk_size = base_size + (1 if i < remainder else 0)
+            chunks.append(all_targets[start:start + chunk_size])
+            start += chunk_size
+        return chunks
     central_instance = prometheus_VMs[0]
     leaf_instances = prometheus_VMs[1:]
 
@@ -26,11 +38,11 @@ def initialize_prometheus(prometheus_VMs, load_generator_server_ips, load_genera
         return
 
     # number of prometheus instances can be 1, 3 or more. for 2, no federation and no benchmarking
-    # Distribute load generator servers among leaf instances and give flattened targets
-    for i, leaf_ip in enumerate(leaf_instances):
-        leaf_targets = flatten_scrape_targets(new_scrape_targets, len(leaf_instances), i)
+    distributed_targets = distribute_targets_evenly(new_scrape_targets, len(leaf_instances))
+    for leaf_ip, leaf_targets in zip(leaf_instances, distributed_targets):
         leaf_config = generate_prometheus_config(leaf_targets, scrape_interval, is_leaf=True)
         upload_config(leaf_ip, zone, project_id, leaf_config, log_path)
+
 
     # Central instance scrapes all leaf instances
     leaf_urls = [f"{ip}:9090" for ip in leaf_instances]

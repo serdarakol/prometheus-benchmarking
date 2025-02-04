@@ -10,19 +10,24 @@
                 "envs": [
                     {
                         "START_PORT": 8000,
-                        "NUM_TARGETS": 100,
+                        "NUM_TARGETS": 2000,
                         "SEED": 42
                     },
                     {
                         "START_PORT": 8000,
-                        "NUM_TARGETS": 100,
+                        "NUM_TARGETS": 2000,
+                        "SEED": 42
+                    },
+                    {
+                        "START_PORT": 8000,
+                        "NUM_TARGETS": 500,
                         "SEED": 42
                     }
                 ]
             },
             "prometheus_instances": {
                 "count": 1,
-                "machine_type": "e2-small",
+                "machine_type": "e2-standard-2",
                 "env": {
                     "SCRAPE_INTERVAL": "1s"
                 }
@@ -33,13 +38,13 @@
                     {
                         "QUERY_LIST": ["rate(metric_0[1m])", "sum(rate(metric_2[1m]))", "rate(metric_0[1m]) + rate(metric_1[1m])", "sum(rate(metric_0[1m])) / sum(rate(metric_1[1m]))", "avg_over_time((sum(rate(metric_0[1m])) / sum(rate(metric_1[1m])))[5m:])"],
                         "QUERY_INTERVAL": 1,
-                        "NUM_THREADS": 100,
+                        "NUM_THREADS": 400,
                         "SEED": 42
                     },
                     {
                         "QUERY_LIST": ["rate(metric_0[1m])", "sum(rate(metric_2[1m]))", "rate(metric_0[1m]) + rate(metric_1[1m])", "sum(rate(metric_0[1m])) / sum(rate(metric_1[1m]))", "avg_over_time((sum(rate(metric_0[1m])) / sum(rate(metric_1[1m])))[5m:])"],
                         "QUERY_INTERVAL": 1,
-                        "NUM_THREADS": 100,
+                        "NUM_THREADS": 400,
                         "SEED": 42
                     }
                 ]

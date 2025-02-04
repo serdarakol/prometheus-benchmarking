@@ -136,7 +136,7 @@ def get_cpu_usage_for_single_vm(project_id, zone, vm_name, experiment_duration, 
     client = monitoring_v3.MetricServiceClient()
 
     now = time.time()
-    start_time = now - experiment_duration
+    start_time = now - (experiment_duration + 180)
 
     project_name = f"projects/{project_id}"
     filter_str = f'metric.type="compute.googleapis.com/instance/cpu/utilization" AND resource.labels.instance_id="{instance_id}"'
@@ -178,14 +178,18 @@ def test1():
     with open("configs/experiments.json") as f:
         experiments = json.load(f)["experiments"]
     experiment = experiments[0]
-    save_log_files_to_local([
-  "35.225.15.48",
-  "35.192.23.164",
+    save_log_files_to_local( [
+  "104.197.253.39",
+  "34.67.153.28",
+  "34.59.1.145",
 ],  [
-  "34.59.252.243",
+  "35.184.51.70",
 ], [
-  "34.132.202.118",
-], experiment, "logs/experiment_p1_me2-micro_lg2x500_qc1x200/1738518478", "us-central1-a", "prometheus-benchmarking-app")
+  "34.170.156.3",
+  "34.58.161.158",
+], experiment, "logs//experiment_p1_me2-small_lg3x500_qc2x200/1738615723", "us-central1-a", "prometheus-benchmarking-app")
+    upload_logs_to_gcs("logs/experiment_p1_me2-small_lg3x500_qc2x200/1738615723", "experiment_p1_me2-small_lg3x500_qc2x200", 1738615723)
 
 if __name__ == "__main__":
-    get_cpu_usage_for_all_vms("prometheus-benchmarking-app", "us-central1-a", ["load-generator-0", "load-generator-1"], 600, "logs/experiment_p1_me2-micro_lg2x50_qc2x100/1738524193")
+    #get_cpu_usage_for_all_vms("prometheus-benchmarking-app", "us-central1-a", ["load-generator-0", "load-generator-1"], 600, "logs/experiment_p1_me2-micro_lg2x50_qc2x100/1738524193")
+    test1()

@@ -18,17 +18,19 @@ def process_query_logs(df):
     return df[['timestamp', 'latency_ms', 'query_component', 'status_code', 'query']]
 
 def compute_statistics(df):
-    summary = df['latency_ms'].agg(
+    df_success = df[df['status_code'] == 200]
+    summary = df_success['latency_ms'].agg(
         ['count', 'mean', 'std', 'min', 'median', 'max']
     ).to_dict()
-    summary['quantile_99'] = df['latency_ms'].quantile(0.99)
-    summary['quantile_95'] = df['latency_ms'].quantile(0.95)
-    summary['quantile_75'] = df['latency_ms'].quantile(0.75)
+    summary['quantile_99'] = df_success['latency_ms'].quantile(0.99)
+    summary['quantile_95'] = df_success['latency_ms'].quantile(0.95)
+    summary['quantile_75'] = df_success['latency_ms'].quantile(0.75)
     summary['success_rate'] = (df[df['status_code'] == 200].shape[0] / df.shape[0]) * 100
     return summary
 
 def plot_latency_over_time(df, output_dir, experiment_duration):
     os.makedirs(output_dir, exist_ok=True)
+    df_success = df[df['status_code'] == 200]
 
     if experiment_duration <= 300:
         window = '5s'
@@ -37,7 +39,7 @@ def plot_latency_over_time(df, output_dir, experiment_duration):
     else:
         window = '1min'
 
-    for component, df_component in df.groupby('query_component'):
+    for component, df_component in df_success.groupby('query_component'):
         plt.figure(figsize=(12, 6))
         df_component = df_component.set_index('timestamp')[['latency_ms']].resample(window).mean().reset_index()
         sns.lineplot(x='timestamp', y='latency_ms', data=df_component, label=component)
@@ -54,13 +56,23 @@ def plot_latency_over_time(df, output_dir, experiment_duration):
     sns.lineplot(x='timestamp', y='latency_ms', data=df_resampled, alpha=0.7)
     plt.xlabel('Time')
     plt.ylabel('Latency (ms)')
-    plt.title('Aggregated Query Latency Over Time')
+    plt.title('Aggregated Query Latency Over Time (success and failed queries)')
     plt.xticks(rotation=45)
     plt.savefig(os.path.join(output_dir, 'latency_over_time_aggregated.png'))
     plt.close()
 
     plt.figure(figsize=(12, 6))
-    for component, df_component in df.groupby('query_component'):
+    df_resampled = df_success.set_index('timestamp')[['latency_ms']].resample(window).mean().reset_index()
+    sns.lineplot(x='timestamp', y='latency_ms', data=df_resampled, alpha=0.7)
+    plt.xlabel('Time')
+    plt.ylabel('Latency (ms)')
+    plt.title('Aggregated Query Latency Over Time (only successful queries)')
+    plt.xticks(rotation=45)
+    plt.savefig(os.path.join(output_dir, 'latency_over_time_aggregated_success.png'))
+    plt.close()
+
+    plt.figure(figsize=(12, 6))
+    for component, df_component in df_success.groupby('query_component'):
         df_component = df_component.set_index('timestamp')[['latency_ms']].resample(window).mean().reset_index()
         sns.lineplot(x='timestamp', y='latency_ms', data=df_component, label=component)
     plt.xlabel('Time')
@@ -72,8 +84,9 @@ def plot_latency_over_time(df, output_dir, experiment_duration):
     plt.close()
 
 def plot_latency_distribution(df, output_dir):
+    df_success = df[df['status_code'] == 200]
     plt.figure(figsize=(8, 5))
-    sns.histplot(df['latency_ms'], bins=50, kde=True)
+    sns.histplot(df_success['latency_ms'], bins=50, kde=True)
     plt.xlabel('Latency (ms)')
     plt.ylabel('Frequency')
     plt.title('Latency Distribution')
@@ -81,6 +94,7 @@ def plot_latency_distribution(df, output_dir):
     plt.close()
 
 def plot_latency_boxplot(df, output_dir):
+    df_success = df[df['status_code'] == 200]
     plt.figure(figsize=(10, 6))
     sns.boxplot(x='query_component', y='latency_ms', data=df)
     plt.xlabel('Query Component', fontsize=12)
@@ -90,14 +104,14 @@ def plot_latency_boxplot(df, output_dir):
     plt.close()
 
     plt.figure(figsize=(10, 6))
-    sns.boxplot(y=df['latency_ms'])
+    sns.boxplot(y=df_success['latency_ms'])
     plt.ylabel('Latency (ms)', fontsize=12)
     plt.title('Overall Latency Distribution', fontsize=14)
     plt.savefig(os.path.join(output_dir, 'latency_boxplot_overall.png'))
     plt.close()
 
     plt.figure(figsize=(14, 8))
-    sns.boxplot(x='query', y='latency_ms', data=df)
+    sns.boxplot(x='query', y='latency_ms', data=df_success)
     plt.xlabel('Query', fontsize=12)
     plt.xticks(rotation=5)
     plt.ylabel('Latency (ms)', fontsize=12)
@@ -140,5 +154,5 @@ def analyze_raw_data_get_results(log_path, experiment_duration):
 
 ### for testing
 if __name__ == "__main__":
-    log_path = "logs/experiment_p1_me2-micro_lg2x500_qc1x200/1738518478"
+    log_path = "logs/experiment_p1_me2-small_lg3x500_qc2x200/1738615723"
     analyze_raw_data_get_results(log_path, 600)
