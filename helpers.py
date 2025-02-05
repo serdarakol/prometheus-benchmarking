@@ -178,17 +178,18 @@ def test1():
     with open("configs/experiments.json") as f:
         experiments = json.load(f)["experiments"]
     experiment = experiments[0]
-    save_log_files_to_local( [
-  "104.197.253.39",
-  "34.67.153.28",
-  "34.59.1.145",
-],  [
-  "35.184.51.70",
-], [
-  "34.170.156.3",
-  "34.58.161.158",
-], experiment, "logs//experiment_p1_me2-small_lg3x500_qc2x200/1738615723", "us-central1-a", "prometheus-benchmarking-app")
-    upload_logs_to_gcs("logs/experiment_p1_me2-small_lg3x500_qc2x200/1738615723", "experiment_p1_me2-small_lg3x500_qc2x200", 1738615723)
+    save_log_files_to_local([
+  "34.59.229.53",
+  "34.30.169.157",
+],
+ [
+  "34.58.111.105",
+],
+[
+  "34.57.119.214",
+  "34.123.108.69",
+], experiment, "logs/experiment_p1_me2-small_lg2x500_qc2x400/1738707106", "us-central1-a", "prometheus-benchmarking-app")
+    upload_logs_to_gcs("logs/experiment_p1_me2-small_lg2x500_qc2x400/1738707106", "experiment_p1_me2-small_lg2x500_qc2x400", 1738707106)
 
 if __name__ == "__main__":
     #get_cpu_usage_for_all_vms("prometheus-benchmarking-app", "us-central1-a", ["load-generator-0", "load-generator-1"], 600, "logs/experiment_p1_me2-micro_lg2x50_qc2x100/1738524193")
