@@ -1,13 +1,6 @@
 # prometheus-benchmarking
 cloud service benchmarking - benchmarking prometheus query latency under scale-out
 
-pip3 install prometheus_client and stuff
-
-
-```brew install prometheus``` or corresponding commands for installing prometheus
-
-prometheus --config.file=<config yml file>
-
 
 benchmarking-prometheus-latency/
 ├── configs/                # Configurations for Prometheus and experiments
@@ -35,14 +28,18 @@ download terraform
 
 run below
 
-gcloud auth login
+gcloud auth login to login your gcloud account
 
-then go to terraform folder
+then go to terraform folder with cd terraform
 terraform init
 terraform plan
 terraform apply
 
-make sure your role has permission
+make sure your role has permissions
 
-dont forget to increase the quoatas for some experiment setups
-- such as exceeding 8 external ip addresses quotas
+then configure the experiments.json file under configs folder
+then
+```python3 orchestrator.py```
+
+after runnning all your experiments run
+```python3 gather_experiment_analysis_results.py```
