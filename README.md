@@ -37,6 +37,9 @@ terraform apply
 
 make sure your role has permissions
 
+run
+```pip3 install -r requirements.txt```
+
 then configure the experiments.json file under configs folder
 then
 ```python3 orchestrator.py```
